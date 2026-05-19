@@ -48,8 +48,9 @@ class MapParser():
                                                               ,'hub'
                                                               ,'nb_drones'
                                                               ,'connection']):
-                raise ValueError(f'Error in line {index} : "{line}",'
-                                 ' the line does not indicate any valid zone')
+                raise ValueError(f"Error in line {index + 1}: unknown directive "
+                                 f"'{line.split(":")[0].strip()}'. Expected one of: nb_drones, " \
+                                "start_hub, end_hub, hub, connection.")
             if not index and not line.startswith('nb_drones'):
                 raise ValueError('The very first line should ' \
                 'indicate the number of drones.')
@@ -76,13 +77,16 @@ class MapParser():
             elif line.startswith(('start_hub', 'hub', 'end_hub')):
 
                 hub_line = (line.split(':', 1)[1]).strip().split(None, 3)
+                if not line.split(":")[0].strip() in ('start_hub', 'hub', 'end_hub'):
+                            raise ValueError(f"Error in line {index + 1}: unknown directive "
+                                             f"'{line.split(":")[0].strip()}'. Expected one of: nb_drones, " \
+                                             "start_hub, end_hub, hub, connection.")
 
                 if len(hub_line) not in (3, 4):
                     raise ValueError(f'Error in line {index}: "{" ".join(hub_line)}": {self.invalid_format} ')
                 if len(hub_line) == 4 and (hub_line[-1].count('[') != 1 or
                                         hub_line[-1].count(']') != 1):
                     raise ValueError(f'Error in line {index}: "{" ".join(hub_line)}": {self.invalid_format} ')
-
                 if len(hub_line) == 4 and (not hub_line[-1].strip().startswith('[')
                                         or hub_line[-1][-1].strip() != ']'):
                     raise ValueError(f'Error in line {index}: "{" ".join(hub_line)}": {self.invalid_format} ')
@@ -107,9 +111,7 @@ class MapParser():
                                             f'multiple zones with the name "{hub_line[0]}".')
                 if line.startswith('start_hub'):
                     if not self.start_hub:
-                        if not line.split(":")[0].strip() == 'start_hub':
-                            raise ValueError(f'Error in line {index} : "{line}",'
-                                 ' the line does not indicate any valid zone')
+                        
                         zone_coordinates = (hub_line[1], hub_line[2])
                         self.start_hub = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                               **metadata, role='start_hub')
@@ -119,9 +121,7 @@ class MapParser():
 
                 elif line.startswith('end_hub'):
                     if not self.end_hub:
-                        if not line.split(":")[0].strip() == 'end_hub':
-                            raise ValueError(f'Error in line {index} : "{line}",'
-                                 ' the line does not indicate any valid zone')
+                        
                         zone_coordinates = (hub_line[1], hub_line[2])
                         self.end_hub = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                             **metadata, role='end_hub')
@@ -130,9 +130,7 @@ class MapParser():
                         raise ValueError(f"Error in line {index}: You can only set the goal zone once.")
 
                 elif line.startswith('hub'):
-                    if not line.split(":")[0].strip() == 'hub':
-                            raise ValueError(f'Error in line {index} : "{line}",'
-                                 ' the line does not indicate any valid zone')
+                    
                     zone_coordinates = (hub_line[1], hub_line[2])
                     zone = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                 **metadata, role='hub')
@@ -187,14 +185,14 @@ class MapParser():
                             raise ValueError(f"Unsupported metadata format {part}."
                                              " (eg: [max_link_capacity=1])")
                         mx = s_part[2]
-                        print(s_part[2])
-                if mx:
-                    c = Connection(connection=[zone01, zone02], max_link_capacity=mx)
+                if any((conn.connection == (zone01, zone02) or conn.connection == (zone02, zone01)) for conn in self.connections):
+                    raise ValueError(f"Duplicated connections ({zone01}-{zone02})")
                 else:
-                    c = Connection(connection=[zone01, zone02])
-                pprint.pprint(c.model_dump())
-
-                # print(zone01, zone02)
+                    if mx:
+                        self.connections.append(Connection(connection=(zone01, zone02), max_link_capacity=mx))
+                    else:
+                        self.connections.append(Connection(connection=(zone01, zone02)))
+                
 
 
         #validating the existence of the starting and goal zones
@@ -257,17 +255,14 @@ try:
     parser.parse_map()
     # for k, v in parser.zones.items():
         # pprint.pprint(v.model_dump)
+    for connection in parser.connections:
+        print(f"{yellow_color}{connection}{end_color}\n")
     print(f"{green_color}Parsed successfully!{end_color}")
 except ValidationError as e:
     for err in e.errors():
-        print(f"{red_color}{err['loc']}: {err['msg']}")
+        print(f"{red_color}Pydantic error: {err['loc']}: {err['msg']}")
+except ValueError as e:
+    print(f"{red_color}Value Error: ", e)
 except Exception as e:
     print(f"{red_color}Error: ", e)
 
-"""
-connection: start -  junction [max_link_capacity=-15]
-
-
-- 15
-('max_link_capacity',): Input should be a valid integer, unable to parse string as an integer
-"""
