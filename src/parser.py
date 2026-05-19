@@ -145,11 +145,31 @@ class MapParser():
                 if connection_line[0].strip() != "connection":
                         raise ValueError(f'Error in line {index} : "{line}",'
                                 ' the line does not indicate any valid zone')
-                connection_data = "".join(str(connection_line[1]).strip().split(None, 1))
+                print("".join(connection_line[1]).strip().split())
+                connection_data = (
+                                "".join(
+                                    str(connection_line[1])
+                                    .strip()
+                                    .split(None, 1)
+                                )
+                                .replace("-", " - ")
+                                .replace("[", " [ ")
+                                .replace("]", " ] ")
+                                .replace("=", " = ")
+                            )
+                print(connection_data)
                 if line.count("-") != 1:
                     raise ValueError(f"The connection line ({connection_data[0]}) is " 
                                       "malformed (eg: <zone01>-<zone02>)")
-                print(connection_data) 
+                for idx in range(len(connection_data.split())):
+                    part = connection_data.split()[idx]
+                    if not idx:
+                        if not part in self.zones:
+                            raise ValueError(f"Error on line {index + 1}: connection"
+                            f" references unknown zone '{part}'")
+                    if idx == 1 and part != "-":
+                        raise ValueError(f"Error on line {index + 1}."
+                        " (eg: connection: <zone01>-<zone02>)")
 
         #validating the existence of the starting and goal zones
         if not self.start_hub and not self.end_hub:
@@ -214,6 +234,6 @@ try:
     print(f"{green_color}Parsed successfully!{end_color}")
 except ValidationError as e:
     for err in e.errors():
-        print(f"{err['loc']}: {err['msg']}")
+        print(f"{red_color}{err['loc']}: {err['msg']}")
 except Exception as e:
-    print("Error: ", e)
+    print(f"{red_color}Error: ", e)
