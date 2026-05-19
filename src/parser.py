@@ -152,10 +152,10 @@ class MapParser():
                                     .strip()
                                     .split(None, 3)
                                 )
-                                .replace("-", " - ")
+                                .replace("-", " - ", 1)
                             )
                 connection_data = connection_data.split(None, 3)
-                if line.count("-") != 1:
+                if len(connection_data) < 3:
                     raise ValueError(f"The connection line ({" ".join(connection_data)}) is " 
                                       "malformed (eg: <zone01>-<zone02>)")
                 zone01 = None
@@ -181,12 +181,13 @@ class MapParser():
                             or part.count('[') != 1:
                             raise ValueError(f"Unsupported metadata format {part}."
                                              " (eg: [max_link_capacity=1])")
-                        s_part = part.strip('[]').replace('=', ' = ').split()
+                        s_part = part.strip('[]').replace('=', ' = ').split(None, 2)
                         if len(s_part) != 3 or s_part[0] != 'max_link_capacity'\
                                 or s_part[1] != "=":
                             raise ValueError(f"Unsupported metadata format {part}."
                                              " (eg: [max_link_capacity=1])")
                         mx = s_part[2]
+                        print(s_part[2])
                 if mx:
                     c = Connection(connection=[zone01, zone02], max_link_capacity=mx)
                 else:
@@ -212,63 +213,61 @@ yellow_color = '\033[93m'
 blue_color = '\033[94m'
 light_blue_color = '\033[96m'
 
-maps = [
-  'maps/easy/01_linear_path.txt', 
-  'maps/easy/02_simple_fork.txt', 
-  'maps/easy/03_basic_capacity.txt', 
-  'maps/medium/01_dead_end_trap.txt', 
-  'maps/medium/02_circular_loop.txt', 
-  'maps/medium/03_priority_puzzle.txt', 
-  'maps/hard/01_maze_nightmare.txt', 
-  'maps/hard/02_capacity_hell.txt', 
-  'maps/hard/03_ultimate_challenge.txt', 
-  'maps/challenger/01_the_impossible_dream.txt'
-]
+# maps = [
+#   'maps/easy/01_linear_path.txt', 
+#   'maps/easy/02_simple_fork.txt', 
+#   'maps/easy/03_basic_capacity.txt', 
+#   'maps/medium/01_dead_end_trap.txt', 
+#   'maps/medium/02_circular_loop.txt', 
+#   'maps/medium/03_priority_puzzle.txt', 
+#   'maps/hard/01_maze_nightmare.txt', 
+#   'maps/hard/02_capacity_hell.txt', 
+#   'maps/hard/03_ultimate_challenge.txt', 
+#   'maps/challenger/01_the_impossible_dream.txt'
+# ]
 
-errr = []
-for map in maps:
-    print(f"Parsing {map}...")
-    parser = MapParser(map)
-    try:
-        parser.parse_map()
-        print(f"{green_color}Parsed successfully!{end_color}")
-        print("Start Hub: ", parser.start_hub)
-        print("End Hub: ", parser.end_hub)
-        print("Other Hubs: ", {k:v for k,v in parser.zones.items() if v.role == 'hub'})
-        print("Number of Drones: ", parser.nb_drones)
-    except ValidationError as e:
-        errr.append(map)
+# errr = []
+# for map in maps:
+#     print(f"Parsing {map}...")
+#     parser = MapParser(map)
+#     try:
+#         parser.parse_map()
+#         print(f"{green_color}Parsed successfully!{end_color}")
+#         print("Start Hub: ", parser.start_hub)
+#         print("End Hub: ", parser.end_hub)
+#         print("Other Hubs: ", {k:v for k,v in parser.zones.items() if v.role == 'hub'})
+#         print("Number of Drones: ", parser.nb_drones)
+#     except ValidationError as e:
+#         errr.append(map)
 
-        for error in e.errors():    
-            print(f"{red_color}Validation Error: {error['msg']} in field {error['loc']}{end_color}")
-    except ValueError as e:
-        errr.append(map)
-        print(f"{red_color}Error: {e}{end_color}")
-    print('-----------------------------')
-if not errr:
-    print(f"{green_color}No errors found{end_color }")
-else:
-    print(f"{red_color}Errors were found in: {errr}.{end_color}")
-print('Parsing completed.')
+#         for error in e.errors():    
+#             print(f"{red_color}Validation Error: {error['msg']} in field {error['loc']}{end_color}")
+#     except ValueError as e:
+#         errr.append(map)
+#         print(f"{red_color}Error: {e}{end_color}")
+#     print('-----------------------------')
+# if not errr:
+#     print(f"{green_color}No errors found{end_color }")
+# else:
+#     print(f"{red_color}Errors were found in: {errr}.{end_color}")
+# print('Parsing completed.')
 
-# try:
-#     parser = MapParser("maps/easy/02_simple_fork.txt")
-#     parser.parse_map()
-#     # for k, v in parser.zones.items():
-#         # pprint.pprint(v.model_dump)
-#     print(f"{green_color}Parsed successfully!{end_color}")
-# except ValidationError as e:
-#     for err in e.errors():
-#         print(f"{red_color}{err['loc']}: {err['msg']}")
-# except Exception as e:
-#     print(f"{red_color}Error: ", e)
+try:
+    parser = MapParser("maps/easy/02_simple_fork.txt")
+    parser.parse_map()
+    # for k, v in parser.zones.items():
+        # pprint.pprint(v.model_dump)
+    print(f"{green_color}Parsed successfully!{end_color}")
+except ValidationError as e:
+    for err in e.errors():
+        print(f"{red_color}{err['loc']}: {err['msg']}")
+except Exception as e:
+    print(f"{red_color}Error: ", e)
 
 """
-{'connection': ('start', 'junction'), 'max_link_capacity': 1}
-{'connection': ('junction', 'path_ad'), 'max_link_capacity': 2}
-{'connection': ('junction', 'path_b'), 'max_link_capacity': 1}
-{'connection': ('path_ad', 'goal'), 'max_link_capacity': 1}
-{'connection': ('path_b', 'goal'), 'max_link_capacity': 1}
-Parsed successfully!
+connection: start -  junction [max_link_capacity=-15]
 
+
+- 15
+('max_link_capacity',): Input should be a valid integer, unable to parse string as an integer
 """
