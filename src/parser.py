@@ -196,3 +196,4 @@ if not errr:
     print(f"{green_color}No errors found{end_color }")
 else:
     print(f"{red_color}Errors were found in: {errr}.{end_color}")
+print('Parsing completed.')
