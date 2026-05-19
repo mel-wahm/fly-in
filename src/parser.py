@@ -152,7 +152,6 @@ class MapParser():
                                     .strip()
                                     .split(None, 1)
                                 )
-                                
                                 .replace("-", " - ")
                                 .replace("[", " [ ")
                                 .replace("]", " ] ")
