@@ -145,7 +145,11 @@ class MapParser():
                 if connection_line[0].strip() != "connection":
                         raise ValueError(f'Error in line {index} : "{line}",'
                                 ' the line does not indicate any valid zone')
-                
+                connection_data = "".join(str(connection_line[1]).strip().split(None, 1))
+                if line.count("-") != 1:
+                    raise ValueError(f"The connection line ({connection_data[0]}) is " 
+                                      "malformed (eg: <zone01>-<zone02>)")
+                print(connection_data) 
 
         #validating the existence of the starting and goal zones
         if not self.start_hub and not self.end_hub:
@@ -159,41 +163,57 @@ class MapParser():
 red_color = '\033[91m'
 green_color = '\033[92m'
 end_color = '\033[0m'
-maps = [
-  'maps/easy/01_linear_path.txt', 
-  'maps/easy/02_simple_fork.txt', 
-  'maps/easy/03_basic_capacity.txt', 
-  'maps/medium/01_dead_end_trap.txt', 
-  'maps/medium/02_circular_loop.txt', 
-  'maps/medium/03_priority_puzzle.txt', 
-  'maps/hard/01_maze_nightmare.txt', 
-  'maps/hard/02_capacity_hell.txt', 
-  'maps/hard/03_ultimate_challenge.txt', 
-  'maps/challenger/01_the_impossible_dream.txt'
-]
+yellow_color = '\033[93m'
+blue_color = '\033[94m'
+light_blue_color = '\033[96m'
 
-errr = []
-for map in maps:
-    print(f"Parsing {map}...")
-    parser = MapParser(map)
-    try:
-        parser.parse_map()
-        print(f"{green_color}Parsed successfully!{end_color}")
-        print("Start Hub: ", parser.start_hub)
-        print("End Hub: ", parser.end_hub)
-        print("Other Hubs: ", {k:v for k,v in parser.zones.items() if v.role == 'hub'})
-        print("Number of Drones: ", parser.nb_drones)
-    except ValidationError as e:
-        errr.append(map)
+# maps = [
+#   'maps/easy/01_linear_path.txt', 
+#   'maps/easy/02_simple_fork.txt', 
+#   'maps/easy/03_basic_capacity.txt', 
+#   'maps/medium/01_dead_end_trap.txt', 
+#   'maps/medium/02_circular_loop.txt', 
+#   'maps/medium/03_priority_puzzle.txt', 
+#   'maps/hard/01_maze_nightmare.txt', 
+#   'maps/hard/02_capacity_hell.txt', 
+#   'maps/hard/03_ultimate_challenge.txt', 
+#   'maps/challenger/01_the_impossible_dream.txt'
+# ]
 
-        for error in e.errors():    
-            print(f"{red_color}Validation Error: {error['msg']} in field {error['loc']}{end_color}")
-    except ValueError as e:
-        errr.append(map)
-        print(f"{red_color}Error: {e}{end_color}")
-    print('-----------------------------')
-if not errr:
-    print(f"{green_color}No errors found{end_color }")
-else:
-    print(f"{red_color}Errors were found in: {errr}.{end_color}")
-print('Parsing completed.')
+# errr = []
+# for map in maps:
+#     print(f"Parsing {map}...")
+#     parser = MapParser(map)
+#     try:
+#         parser.parse_map()
+#         print(f"{green_color}Parsed successfully!{end_color}")
+#         print("Start Hub: ", parser.start_hub)
+#         print("End Hub: ", parser.end_hub)
+#         print("Other Hubs: ", {k:v for k,v in parser.zones.items() if v.role == 'hub'})
+#         print("Number of Drones: ", parser.nb_drones)
+#     except ValidationError as e:
+#         errr.append(map)
+
+#         for error in e.errors():    
+#             print(f"{red_color}Validation Error: {error['msg']} in field {error['loc']}{end_color}")
+#     except ValueError as e:
+#         errr.append(map)
+#         print(f"{red_color}Error: {e}{end_color}")
+#     print('-----------------------------')
+# if not errr:
+#     print(f"{green_color}No errors found{end_color }")
+# else:
+#     print(f"{red_color}Errors were found in: {errr}.{end_color}")
+# print('Parsing completed.')
+
+try:
+    parser = MapParser("maps/easy/02_simple_fork.txt")
+    parser.parse_map()
+    for k, v in parser.zones.items():
+        print(f"{light_blue_color}{k}:  {v}{end_color}")
+    print(f"{green_color}Parsed successfully!{end_color}")
+except ValidationError as e:
+    for err in e.errors():
+        print(f"{err['loc']}: {err['msg']}")
+except Exception as e:
+    print("Error: ", e)
