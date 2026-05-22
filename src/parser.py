@@ -83,18 +83,18 @@ class MapParser():
                                              "start_hub, end_hub, hub, connection.")
 
                 if len(hub_line) not in (3, 4):
-                    raise ValueError(f'Error in line {index}: "{" ".join(hub_line)}": {self.invalid_format} ')
+                    raise ValueError(f'Error in line {index + 1}: "{" ".join(hub_line)}": {self.invalid_format} ')
                 if len(hub_line) == 4 and (hub_line[-1].count('[') != 1 or
                                         hub_line[-1].count(']') != 1):
-                    raise ValueError(f'Error in line {index}: "{" ".join(hub_line)}": {self.invalid_format} ')
+                    raise ValueError(f'Error in line {index + 1}: "{" ".join(hub_line)}": {self.invalid_format} ')
                 if len(hub_line) == 4 and (not hub_line[-1].strip().startswith('[')
                                         or hub_line[-1][-1].strip() != ']'):
-                    raise ValueError(f'Error in line {index}: "{" ".join(hub_line)}": {self.invalid_format} ')
+                    raise ValueError(f'Error in line {index + 1}: "{" ".join(hub_line)}": {self.invalid_format} ')
                 metadata = {}
                 if len (hub_line) == 4:
                     token = hub_line[3].strip('[]').replace('=', ' = ').split()
                     if len(token) % 3:
-                        raise ValueError(f"Unsupported format: (eg: color = gray)")
+                        raise ValueError(f"Unsupported metadata format: (eg: color = gray)")
                     for idx, part in enumerate(token):
                         if not idx % 3 and part not in ('max_drones', 'zone', 'color'):
                             raise ValueError(f"Parsing error in Metadata (Unexpected key): {part}")
@@ -102,22 +102,25 @@ class MapParser():
                             raise ValueError(f"Unsupported format: (eg: color = gray)")
                         if not (idx - 2) % 3:
                             if not metadata.get(token[idx - 2]):
-                                metadata[token[idx - 2]] = token[idx]
+                                metadata[token[idx - 2]] = token[idx].lower()
                             else:
                                 raise ValueError(f"Duplicated keys are not allowed ({token[idx - 2]})")
-                
+
+
                 if hub_line[0] in self.zones:
                         raise ValueError(f"Error in line {index}, "
                                             f'multiple zones with the name "{hub_line[0]}".')
+
+
                 if line.startswith('start_hub'):
                     if not self.start_hub:
-                        
                         zone_coordinates = (hub_line[1], hub_line[2])
                         self.start_hub = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                               **metadata, role='start_hub')
                         self.zones[hub_line[0]] = self.start_hub
                     else:
                         raise ValueError(f"Error in line {index}: You can only set the starting zone once.")
+
 
                 elif line.startswith('end_hub'):
                     if not self.end_hub:
@@ -129,6 +132,7 @@ class MapParser():
                     else:
                         raise ValueError(f"Error in line {index}: You can only set the goal zone once.")
 
+
                 elif line.startswith('hub'):
                     
                     zone_coordinates = (hub_line[1], hub_line[2])
@@ -138,7 +142,6 @@ class MapParser():
 
             # Handling the case of connections
             elif line.startswith('connection'):
-                #connection: gate_hell1-gate_hell2 [max_link_capacity=1]
                 connection_line = line.strip().split(':')
                 if connection_line[0].strip() != "connection":
                         raise ValueError(f'Error in line {index} : "{line}",'
@@ -197,72 +200,72 @@ class MapParser():
 
         #validating the existence of the starting and goal zones
         if not self.start_hub and not self.end_hub:
-            raise ValueError(f"Error in line {index}: Map has no Starting zone and no Goal zone .")
+            raise ValueError(f"Error: Map has no Starting zone and no Goal zone .")
         elif not self.start_hub:
-            raise ValueError(f"Error in line {index}: Map has no Starting zone.")
+            raise ValueError(f"Error: Map has no Starting zone.")
         elif not self.end_hub:
-            raise ValueError(f"Error in line {index}: Map has no Goal zone.")
+            raise ValueError(f"Error: Map has no Goal zone.")
 
+if __name__ == "__main__":
+    red_color = '\033[91m'
+    green_color = '\033[92m'
+    end_color = '\033[0m'
+    yellow_color = '\033[93m'
+    blue_color = '\033[94m'
+    light_blue_color = '\033[96m'
 
-red_color = '\033[91m'
-green_color = '\033[92m'
-end_color = '\033[0m'
-yellow_color = '\033[93m'
-blue_color = '\033[94m'
-light_blue_color = '\033[96m'
+    maps = [
+    'maps/easy/01_linear_path.txt', 
+    'maps/easy/02_simple_fork.txt', 
+    'maps/easy/03_basic_capacity.txt', 
+    'maps/medium/01_dead_end_trap.txt', 
+    'maps/medium/02_circular_loop.txt', 
+    'maps/medium/03_priority_puzzle.txt', 
+    'maps/hard/01_maze_nightmare.txt', 
+    'maps/hard/02_capacity_hell.txt', 
+    'maps/hard/03_ultimate_challenge.txt', 
+    'maps/challenger/01_the_impossible_dream.txt'
+    ]
 
-# maps = [
-#   'maps/easy/01_linear_path.txt', 
-#   'maps/easy/02_simple_fork.txt', 
-#   'maps/easy/03_basic_capacity.txt', 
-#   'maps/medium/01_dead_end_trap.txt', 
-#   'maps/medium/02_circular_loop.txt', 
-#   'maps/medium/03_priority_puzzle.txt', 
-#   'maps/hard/01_maze_nightmare.txt', 
-#   'maps/hard/02_capacity_hell.txt', 
-#   'maps/hard/03_ultimate_challenge.txt', 
-#   'maps/challenger/01_the_impossible_dream.txt'
-# ]
+    # errr = []
+    # for map in maps:
+    #     print(f"Parsing {map}...")
+    #     parser = MapParser(map)
+    #     try:
+    #         parser.parse_map()
+    #         print(f"{green_color}Parsed successfully!{end_color}")
+    #         print("Start Hub: ", parser.start_hub)
+    #         print("End Hub: ", parser.end_hub)
+    #         print("Other Hubs: ", {k:v for k,v in parser.zones.items() if v.role == 'hub'})
+    #         print("Number of Drones: ", parser.nb_drones)
+    #     except ValidationError as e:
+    #         errr.append(map)
 
-# errr = []
-# for map in maps:
-#     print(f"Parsing {map}...")
-#     parser = MapParser(map)
-#     try:
-#         parser.parse_map()
-#         print(f"{green_color}Parsed successfully!{end_color}")
-#         print("Start Hub: ", parser.start_hub)
-#         print("End Hub: ", parser.end_hub)
-#         print("Other Hubs: ", {k:v for k,v in parser.zones.items() if v.role == 'hub'})
-#         print("Number of Drones: ", parser.nb_drones)
-#     except ValidationError as e:
-#         errr.append(map)
+    #         for error in e.errors():    
+    #             print(f"{red_color}Validation Error: {error['msg']} in field {error['loc']}{end_color}")
+    #     except ValueError as e:
+    #         errr.append(map)
+    #         print(f"{red_color}Error: {e}{end_color}")
+    #     print('-----------------------------')
+    # if not errr:
+    #     print(f"{green_color}No errors found{end_color }")
+    # else:
+    #     print(f"{red_color}Errors were found in: {errr}.{end_color}")
+    # print('Parsing completed.')
 
-#         for error in e.errors():    
-#             print(f"{red_color}Validation Error: {error['msg']} in field {error['loc']}{end_color}")
-#     except ValueError as e:
-#         errr.append(map)
-#         print(f"{red_color}Error: {e}{end_color}")
-#     print('-----------------------------')
-# if not errr:
-#     print(f"{green_color}No errors found{end_color }")
-# else:
-#     print(f"{red_color}Errors were found in: {errr}.{end_color}")
-# print('Parsing completed.')
-
-try:
-    parser = MapParser("maps/easy/02_simple_fork.txt")
-    parser.parse_map()
-    # for k, v in parser.zones.items():
-        # pprint.pprint(v.model_dump)
-    for connection in parser.connections:
-        print(f"{yellow_color}{connection}{end_color}\n")
-    print(f"{green_color}Parsed successfully!{end_color}")
-except ValidationError as e:
-    for err in e.errors():
-        print(f"{red_color}Pydantic error: {err['loc']}: {err['msg']}")
-except ValueError as e:
-    print(f"{red_color}Value Error: ", e)
-except Exception as e:
-    print(f"{red_color}Error: ", e)
+    for map in maps:
+        try:
+            print(f"{green_color}{map}{end_color}")
+            parser = MapParser(map)
+            parser.parse_map()
+            # for k, v in parser.zones.items():
+                # pprint.pprint(v.model_dump)
+            print(f"{green_color}Parsed successfully!{end_color}")
+        except ValidationError as e:
+            for err in e.errors():
+                print(f"{red_color}Pydantic error: {err['loc']}: {err['msg']}")
+        except ValueError as e:
+            print(f"{red_color}Value Error: ", e)
+        except Exception as e:
+            print(f"{red_color}Error: ", e)
 
