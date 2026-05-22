@@ -15,6 +15,7 @@ class Renderer(arcade.Window):
         cy = self.height / 2
         for con in self.connections:
             
+            pass
         for name, zone in self.parser.zones.items():
             x, y = zone.coordinates
             color = getattr(arcade.color, zone.color.upper())
