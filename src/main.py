@@ -1,10 +1,13 @@
 from parser import MapParser
-from models import Connection, Zone
-from graph import Graph
 from visualizer import Renderer
 import os
 import arcade
+import warnings
+from pathfinder import Pathfinder
+from graph import Graph
+from pydantic import ValidationError
 
+warnings.filterwarnings("ignore")
 maps = [
     'maps/easy/01_linear_path.txt', #0 
     'maps/easy/02_simple_fork.txt', #1
@@ -17,26 +20,58 @@ maps = [
     'maps/hard/03_ultimate_challenge.txt', #8
     'maps/challenger/01_the_impossible_dream.txt' #9
     ]
-parser = MapParser(maps[1])
-parser.parse_map()
 
-# graph = Graph(parser.zones, parser.connections)
-# graph.adjacency_list()
-# for gr, d in graph.graph.items():
-#     print(gr, "---->", d)
 
 red_color = '\033[91m'
 green_color = '\033[92m'
 end_color = '\033[0m'
-bald_access = '\033[1m'
+bold_font = '\033[1m'
+yellow_color = '\033[93m'
+light_blue_color = '\033[94m'
+blue_color = '\033[34m'
+
 try:
+    os.system("clear")
+    parser = MapParser(maps[0])
+    parser.parse_map()
     r = Renderer(parser, parser.connections)
+    lines = [
+    f"{green_color}███████╗{end_color} {blue_color}██╗     {end_color} {yellow_color}██╗   ██╗{end_color} {red_color}██╗{end_color} {light_blue_color}███╗   ██╗{end_color}",
+    f"{green_color}██╔════╝{end_color} {blue_color}██║     {end_color} {yellow_color}╚██╗ ██╔╝{end_color} {red_color}██║{end_color} {light_blue_color}████╗  ██║{end_color}",
+    f"{green_color}█████╗  {end_color} {blue_color}██║     {end_color} {yellow_color} ╚████╔╝ {end_color} {red_color}██║{end_color} {light_blue_color}██╔██╗ ██║{end_color}",
+    f"{green_color}██╔══╝  {end_color} {blue_color}██║     {end_color} {yellow_color}  ╚██╔╝  {end_color} {red_color}██║{end_color} {light_blue_color}██║╚██╗██║{end_color}",
+    f"{green_color}██║     {end_color} {blue_color}███████╗{end_color} {yellow_color}   ██║   {end_color} {red_color}██║{end_color} {light_blue_color}██║ ╚████║{end_color}",
+    f"{green_color}╚═╝     {end_color} {blue_color}╚══════╝{end_color} {yellow_color}   ╚═╝   {end_color} {red_color}╚═╝{end_color} {light_blue_color}╚═╝  ╚═══╝{end_color}",
+    f"\n{green_color}---------------By: mel-wahm---------------{end_color}",
+]
+
+    for line in lines:
+        print(line)
     arcade.run()
 except KeyboardInterrupt:
     os.system("clear")
-    print(f"{bald_access}{green_color}--------------------------------------{end_color}")
-    print(f"{bald_access}{red_color} The program was stopped by the user{end_color}")
-    print(f"{bald_access}{green_color}--------------------------------------{end_color}")
+    print(f"{bold_font}{green_color}--------------------------------------{end_color}")
+    print(f"{bold_font}{red_color} The program was stopped by the user{end_color}")
+    print(f"{bold_font}{green_color}--------------------------------------{end_color}")
     print()
 except Exception as e:
-    print(f"{bald_access}{red_color}Error:", e)
+    print(f"{bold_font}{red_color}Error:", e)
+
+
+try:
+    parser = MapParser(maps[0])
+    parser.parse_map()
+    graph = Graph(parser.zones, parser.connections)
+    pathfinder = Pathfinder(graph, parser)
+    pathfinder.pathfinding()
+except KeyboardInterrupt:
+    os.system("clear")
+    print(f"{bold_font}{green_color}--------------------------------------{end_color}")
+    print(f"{bold_font}{red_color} The program was stopped by the user{end_color}")
+    print(f"{bold_font}{green_color}--------------------------------------{end_color}")
+    print()
+except ValidationError as e:
+    for err in e.errors():
+        print(f"{red_color}Error", err['msg'], end_color)
+except Exception as e:
+    print(f"{bold_font}{red_color}Error:", e)

@@ -31,6 +31,7 @@ class Zone(BaseModel):
             raise ValueError('Tha name of the zone cannot contain a dash "-"')
         return name
 
+
 class Connection(BaseModel):
     connection: Tuple[str, str]
     max_link_capacity: int = Field(gt=0, default=1)

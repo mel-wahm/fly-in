@@ -93,6 +93,9 @@ class MapParser():
                 metadata = {}
                 if len (hub_line) == 4:
                     token = hub_line[3].strip('[]').replace('=', ' = ').split()
+                    if not token:
+                        raise ValueError(f"Error: Unsupported metadata format {token}."
+                        " (eg: [color=yellow])")
                     if len(token) % 3:
                         raise ValueError(f"Unsupported metadata format: (eg: color = gray)")
                     for idx, part in enumerate(token):
