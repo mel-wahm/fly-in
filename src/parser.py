@@ -1,7 +1,6 @@
 from typing import List
 from models import Zone, Connection
 from pydantic import ValidationError
-import pprint
 
 class NegativeError(Exception):
     pass
@@ -49,7 +48,7 @@ class MapParser():
                                                               ,'nb_drones'
                                                               ,'connection']):
                 raise ValueError(f"Error in line {index + 1}: unknown directive "
-                                 f"'{line.split(":")[0].strip()}'. Expected one of: nb_drones, " \
+                                 f"'{line.split(':')[0].strip()}'. Expected one of: nb_drones, " \
                                 "start_hub, end_hub, hub, connection.")
             if not index and not line.startswith('nb_drones'):
                 raise ValueError('The very first line should ' \
@@ -79,7 +78,7 @@ class MapParser():
                 hub_line = (line.split(':', 1)[1]).strip().split(None, 3)
                 if not line.split(":")[0].strip() in ('start_hub', 'hub', 'end_hub'):
                             raise ValueError(f"Error in line {index + 1}: unknown directive "
-                                             f"'{line.split(":")[0].strip()}'. Expected one of: nb_drones, " \
+                                             f"'{line.split(':')[0].strip()}'. Expected one of: nb_drones, " \
                                              "start_hub, end_hub, hub, connection.")
 
                 if len(hub_line) not in (3, 4):
@@ -124,7 +123,6 @@ class MapParser():
                     else:
                         raise ValueError(f"Error in line {index}: You can only set the starting zone once.")
 
-
                 elif line.startswith('end_hub'):
                     if not self.end_hub:
                         
@@ -134,7 +132,6 @@ class MapParser():
                         self.zones[hub_line[0]] = self.end_hub
                     else:
                         raise ValueError(f"Error in line {index}: You can only set the goal zone once.")
-
 
                 elif line.startswith('hub'):
                     
@@ -160,7 +157,7 @@ class MapParser():
                             )
                 connection_data = connection_data.split(None, 3)
                 if len(connection_data) < 3:
-                    raise ValueError(f"The connection line ({" ".join(connection_data)}) is " 
+                    raise ValueError(f"The connection line ({' '.join(connection_data)}) is " 
                                       "malformed (eg: <zone01>-<zone02>)")
                 zone01 = None
                 zone02 = None

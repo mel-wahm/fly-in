@@ -9,46 +9,52 @@ class Pathfinder():
     def __init__(self, graph: Graph, parser: MapParser):
         self.graph = graph
         self.zones = parser.zones
-        self.distances = {zone: float("inf") for zone in self.zones}
+        self.costs = {zone: float("inf") for zone in self.zones}
         self.start_zone = None
         self.end_zone = None
         self.final_path = []
-        for zone in self.distances:
-            if self.zones[zone].role == Zone_Role.start_hub:
-                self.start_zone = zone
-                self.distances[zone] = 0
-            if self.zones[zone].role == Zone_Role.end_hub:
-                self.end_zone = zone
-    
-    def pathfinding(self):
-        queue = []
-        came_from = {}
-        heapq.heappush(queue, (self.distances[self.start_zone], self.start_zone))
-        visited = set()
+        self.way_cost = {
+            Zone_Type.normal: 1,
+            Zone_Type.priority: 2,
+            Zone_Type.restricted: 3,
+            Zone_Type.blocked: 1
+        }
+        for zone_name, zone in self.zones.items():
+            if zone.role == Zone_Role.start_hub:
+                self.start_zone = zone_name
+                self.costs[zone_name] = 0
+            if zone.role == Zone_Role.end_hub:
+                self.end_zone = zone_name
 
-        while queue:
-            zone_cost, current_zone = heapq.heappop(queue)
-            if current_zone in visited:
-                continue
-            visited.add(current_zone)
-            for zone, _ in self.graph.graph[current_zone]:
-                if self.zones[zone].zone == Zone_Type.blocked:
+
+    def pathfinding(self):
+        heap = [(0, self.start_zone)]
+        came_from = {}
+
+        while heap:
+            current_cost, current_zone = heapq.heappop(heap)
+            if current_cost > self.costs[current_zone]:
+                continue 
+            if current_zone == self.end_zone:
+                break
+            for next_zone, _ in self.graph.graph[current_zone]:
+                next_type = self.zones[next_zone].zone
+                if next_zone != self.end_zone and next_type == Zone_Type.blocked:
                     continue
-                way = 2 if self.zones[zone].zone == Zone_Type.restricted else 1
-                if zone_cost + way < self.distances[zone]:
-                    self.distances[zone] = way + zone_cost
-                    heapq.heappush(queue, (self.distances[zone], zone))
-                    came_from[zone] = current_zone
-        if self.end_zone not in visited:
-            raise ValueError("The goal zone is unreachable")
-        #constructing path
+                if self.costs[next_zone] > current_cost + self.way_cost[next_type]:
+                    self.costs[next_zone] = current_cost + self.way_cost[next_type]
+                    came_from[next_zone] = current_zone
+                    heapq.heappush(heap, (self.costs[next_zone], next_zone))
+
+        return came_from
+    
+    def construct_path(self, came_from):
+        if self.end_zone not in came_from:
+            raise ValueError("The End Goal Is Not Reachable.")
+        self.final_path.append(self.end_zone)
         current_zone = self.end_zone
-        self.final_path.append(current_zone)
-        while True:
+        while current_zone in came_from:
             current_zone = came_from[current_zone]
             self.final_path.append(current_zone)
-            if current_zone == self.start_zone:
-                break
+        
         self.final_path = self.final_path[::-1]
-
-

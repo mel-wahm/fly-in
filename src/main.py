@@ -31,20 +31,28 @@ yellow_color = '\033[93m'
 light_blue_color = '\033[94m'
 blue_color = '\033[34m'
 
-# try:
-#     os.system("clear")
-#     parser = MapParser(maps[1])
-#     parser.parse_map()
-#     r = Renderer(parser, parser.connections)
-#     lines = [
-#     f"{green_color}███████╗{end_color} {blue_color}██╗     {end_color} {yellow_color}██╗   ██╗{end_color} {red_color}██╗{end_color} {light_blue_color}███╗   ██╗{end_color}",
-#     f"{green_color}██╔════╝{end_color} {blue_color}██║     {end_color} {yellow_color}╚██╗ ██╔╝{end_color} {red_color}██║{end_color} {light_blue_color}████╗  ██║{end_color}",
-#     f"{green_color}█████╗  {end_color} {blue_color}██║     {end_color} {yellow_color} ╚████╔╝ {end_color} {red_color}██║{end_color} {light_blue_color}██╔██╗ ██║{end_color}",
-#     f"{green_color}██╔══╝  {end_color} {blue_color}██║     {end_color} {yellow_color}  ╚██╔╝  {end_color} {red_color}██║{end_color} {light_blue_color}██║╚██╗██║{end_color}",
-#     f"{green_color}██║     {end_color} {blue_color}███████╗{end_color} {yellow_color}   ██║   {end_color} {red_color}██║{end_color} {light_blue_color}██║ ╚████║{end_color}",
-#     f"{green_color}╚═╝     {end_color} {blue_color}╚══════╝{end_color} {yellow_color}   ╚═╝   {end_color} {red_color}╚═╝{end_color} {light_blue_color}╚═╝  ╚═══╝{end_color}",
-#     f"\n{green_color}---------------By: mel-wahm---------------{end_color}",
-# ]
+os.system("clear")
+parser = MapParser(maps[0])
+parser.parse_map()
+r = Renderer(parser, parser.connections)
+arcade.run()
+lines = [
+f"{green_color}███████╗{end_color} {blue_color}██╗     {end_color} {yellow_color}██╗   ██╗{end_color} {red_color}██╗{end_color} {light_blue_color}███╗   ██╗{end_color}",
+f"{green_color}██╔════╝{end_color} {blue_color}██║     {end_color} {yellow_color}╚██╗ ██╔╝{end_color} {red_color}██║{end_color} {light_blue_color}████╗  ██║{end_color}",
+f"{green_color}█████╗  {end_color} {blue_color}██║     {end_color} {yellow_color} ╚████╔╝ {end_color} {red_color}██║{end_color} {light_blue_color}██╔██╗ ██║{end_color}",
+f"{green_color}██╔══╝  {end_color} {blue_color}██║     {end_color} {yellow_color}  ╚██╔╝  {end_color} {red_color}██║{end_color} {light_blue_color}██║╚██╗██║{end_color}",
+f"{green_color}██║     {end_color} {blue_color}███████╗{end_color} {yellow_color}   ██║   {end_color} {red_color}██║{end_color} {light_blue_color}██║ ╚████║{end_color}",
+f"{green_color}╚═╝     {end_color} {blue_color}╚══════╝{end_color} {yellow_color}   ╚═╝   {end_color} {red_color}╚═╝{end_color} {light_blue_color}╚═╝  ╚═══╝{end_color}",
+f"\n{green_color}---------------By: mel-wahm---------------{end_color}",
+]
+for line in lines:
+    print(line)
+connections = Graph(parser.zones, parser.connections)
+finder = Pathfinder(connections, parser)
+path = finder.pathfinding()
+finder.construct_path(path)
+print('\n\n\n', green_color, finder.final_path, end_color, '\n\n\n')
+
 
 #     for line in lines:
 #         print(line)
@@ -80,21 +88,29 @@ blue_color = '\033[34m'
 
 
 
-try:
-    parser = MapParser(maps[0])
-    parser.parse_map()
-    drones = Simulator(parser)
-    for drone in drones.drones:
-        print(drone.id)
-except KeyboardInterrupt:
-    os.system("clear")
-    print(f"{bold_font}{green_color}--------------------------------------{end_color}")
-    print(f"{bold_font}{red_color} The program was stopped by the user{end_color}")
-    print(f"{bold_font}{green_color}--------------------------------------{end_color}")
-    print()
-except ValidationError as e:
-    for err in e.errors():
-        print(f"{red_color}Error", err['msg'], end_color)
-except Exception as e:
-    print(f"{bold_font}{red_color}Error:", e)
+# try:
+#     parser = MapParser(maps[0])
+#     parser.parse_map()
+#     graph = Graph(parser.zones, parser.connections)
+#     drones = Simulator(parser)
+#     # visualizer = Renderer(parser, parser.connections)
+#     # arcade.run()
+#     # for drone in drones.drones:
+#     #     print(drone.id)
+#     finder = Pathfinder(graph, parser)
+#     finder.pathfinding()
+#     print(finder.final_path)
 
+# except KeyboardInterrupt:
+#     os.system("clear")
+#     print(f"{bold_font}{green_color}--------------------------------------{end_color}")
+#     print(f"{bold_font}{red_color} The program was stopped by the user{end_color}")
+#     print(f"{bold_font}{green_color}--------------------------------------{end_color}")
+#     print()
+# except ValidationError as e:
+#     for err in e.errors():
+#         print(f"{red_color}Error", err['msg'], end_color)
+# except Exception as e:
+#     print(f"{bold_font}{red_color}Error:", e)
+
+# for map in maps:
