@@ -57,4 +57,4 @@ class Pathfinder():
             current_zone = came_from[current_zone]
             self.final_path.append(current_zone)
         
-        self.final_path = self.final_path[::-1]
+        return self.final_path[::-1]
