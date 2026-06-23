@@ -1,4 +1,5 @@
-lst = [1, 2, 3, 4, 5]
-lst3 = ['a', 'b', 'c']
-lst2 = zip(lst, lst3)
-print(list(lst2))
+dct = {1: "test",
+       2: "again_test",
+       3: "final_test"}
+
+print(min(dct))

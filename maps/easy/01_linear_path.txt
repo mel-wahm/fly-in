@@ -1,9 +1,9 @@
 # Easy Level 1: Simple linear path
 nb_drones: 5
 
-start_hub: start -1 -2 [color=darkred]
+start_hub: start -1 -1 [color=darkred]
 hub: waypoint1 1 0 [color=green]
-hub: waypoint2 2 0 [color=dark_green zone=restricted]
+hub: waypoint2 2 0 [color=dark_green]
 hub: waypoint3 3 0 [color=red zone=restricted]
 end_hub: goal 3 1 [color=lightblue]
 

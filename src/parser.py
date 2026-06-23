@@ -195,8 +195,6 @@ class MapParser():
                         self.connections.append(Connection(connection=(zone01, zone02), max_link_capacity=mx))
                     else:
                         self.connections.append(Connection(connection=(zone01, zone02)))
-                
-
 
         #validating the existence of the starting and goal zones
         if not self.start_hub and not self.end_hub:
@@ -205,67 +203,3 @@ class MapParser():
             raise ValueError(f"Error: Map has no Starting zone.")
         elif not self.end_hub:
             raise ValueError(f"Error: Map has no Goal zone.")
-
-if __name__ == "__main__":
-    red_color = '\033[91m'
-    green_color = '\033[92m'
-    end_color = '\033[0m'
-    yellow_color = '\033[93m'
-    blue_color = '\033[94m'
-    light_blue_color = '\033[96m'
-
-    maps = [
-    'maps/easy/01_linear_path.txt', 
-    'maps/easy/02_simple_fork.txt', 
-    'maps/easy/03_basic_capacity.txt', 
-    'maps/medium/01_dead_end_trap.txt', 
-    'maps/medium/02_circular_loop.txt', 
-    'maps/medium/03_priority_puzzle.txt', 
-    'maps/hard/01_maze_nightmare.txt', 
-    'maps/hard/02_capacity_hell.txt', 
-    'maps/hard/03_ultimate_challenge.txt', 
-    'maps/challenger/01_the_impossible_dream.txt'
-    ]
-
-    # errr = []
-    # for map in maps:
-    #     print(f"Parsing {map}...")
-    #     parser = MapParser(map)
-    #     try:
-    #         parser.parse_map()
-    #         print(f"{green_color}Parsed successfully!{end_color}")
-    #         print("Start Hub: ", parser.start_hub)
-    #         print("End Hub: ", parser.end_hub)
-    #         print("Other Hubs: ", {k:v for k,v in parser.zones.items() if v.role == 'hub'})
-    #         print("Number of Drones: ", parser.nb_drones)
-    #     except ValidationError as e:
-    #         errr.append(map)
-
-    #         for error in e.errors():    
-    #             print(f"{red_color}Validation Error: {error['msg']} in field {error['loc']}{end_color}")
-    #     except ValueError as e:
-    #         errr.append(map)
-    #         print(f"{red_color}Error: {e}{end_color}")
-    #     print('-----------------------------')
-    # if not errr:
-    #     print(f"{green_color}No errors found{end_color }")
-    # else:
-    #     print(f"{red_color}Errors were found in: {errr}.{end_color}")
-    # print('Parsing completed.')
-
-    for map in maps:
-        try:
-            print(f"{green_color}{map}{end_color}")
-            parser = MapParser(map)
-            parser.parse_map()
-            # for k, v in parser.zones.items():
-                # pprint.pprint(v.model_dump)
-            print(f"{green_color}Parsed successfully!{end_color}")
-        except ValidationError as e:
-            for err in e.errors():
-                print(f"{red_color}Pydantic error: {err['loc']}: {err['msg']}")
-        except ValueError as e:
-            print(f"{red_color}Value Error: ", e)
-        except Exception as e:
-            print(f"{red_color}Error: ", e)
-

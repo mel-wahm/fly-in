@@ -20,7 +20,7 @@ class Zone(BaseModel):
     name: str
     coordinates: Tuple[int, int]
     zone: Zone_Type = Zone_Type.normal
-    max_drones: int = Field(ge=1, default=1)
+    max_drones: int = Field(gt=0, default=1)
     color : Optional[str] = None
     role : Zone_Role = Zone_Role.hub
 

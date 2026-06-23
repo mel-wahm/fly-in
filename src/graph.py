@@ -4,7 +4,6 @@ from typing import Dict, Tuple, List
 
 class Graph():
 
-
     def __init__(self, zones, connections):
         self.zones : Dict[str, Zone] = zones 
         self.connections : List [Connection] = connections
