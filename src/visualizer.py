@@ -2,7 +2,8 @@ import arcade
 
 from models import Zone_Role
 from pathfinder import Pathfinder
-from math import sqrt
+from math import sin
+
 
 
 class Renderer(arcade.Window):
@@ -14,11 +15,12 @@ class Renderer(arcade.Window):
 
 
     def __init__(self, parser, states):
-        super().__init__(1980, 1080, parser.map_path)
+        super().__init__(1980, 1080, parser.map_path, fullscreen=True)
         self.parser = parser
         self.connections = parser.connections
         self.speed = 150
         self.states = states
+        self.progress = 0
         # for turn, state in self.states.items():
         #     print(turn, ' --> ', state)
         # average map coordinates, used to center everything on screen
@@ -34,7 +36,6 @@ class Renderer(arcade.Window):
 
         # textures
         self.drone_png = arcade.load_texture('photos/drone2.png')
-        self.wallpaper = arcade.load_texture('photos/wallpaper7.jpg')
         self.index = 1
 
         # find start/end hub positions
@@ -64,6 +65,7 @@ class Renderer(arcade.Window):
 
     def on_update(self, delta_time):
         self.times += delta_time
+        self.progress += delta_time * 3
         if self.times > 1 and self.turns < len(self.states) - 1:
             self.turns += 1
             self.times = 0
@@ -82,20 +84,33 @@ class Renderer(arcade.Window):
         self.clear()
 
         # background
-        w_rect = arcade.rect.XYWH(self.width / 2, self.height / 2, 1920, 1080)
-        arcade.draw_texture_rect(self.wallpaper, w_rect)
+        r, g, b = arcade.color.RIFLE_GREEN[:3]
+        arcade.draw_rect_filled(
+            arcade.rect.XYWH(self.width / 2, self.height / 2, self.width, self.height),
+            (r, g, b, 55)
+        )
 
+        for g in range(0, self.height, 4):
+                arcade.draw_line(0, g, self.width, g, (222, 222, 222, 70))
         
+        for g in range(0, self.height, 80):
+                arcade.draw_line(0, g, self.width, g, (240, 198, 162, 80))
+        for g in range(0, self.width, 80):
+                arcade.draw_line(g, 0, g, self.height, (240, 198, 162, 80))
+# 
+        # arcade.draw_rect_outline(arcade.rect.XYWH(self.width / 2, self.height / 2,
+                                    # 1500, 830), arcade.color.YELLOW, 1, 0)
 
         # --- draw connections ---
         for con in self.connections:
             x_cord1, y_cord1 = self.center_coordinates(self.parser.zones[con.connection[0]].coordinates)
             x_cord2, y_cord2 = self.center_coordinates(self.parser.zones[con.connection[1]].coordinates)
-            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, arcade.color.WHITE, 4)
-
-        # --- draw zones ---
+            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, arcade.color.EARTH_YELLOW, 4)
 
         arcade.rect.XYWH(self.drone_x, self.drone_y, 15, 15)
+        self.turns += 1
+        # --- draw zones ---
+
         for name, zone in self.parser.zones.items():
             # zone color
             color = arcade.color.LIGHT_BLUE
@@ -112,16 +127,15 @@ class Renderer(arcade.Window):
 
             x, y = self.center_coordinates(zone.coordinates)
             
-            
+            r, g, b = color[:3]
 
-            # arcade.draw_circle_filled(x, y, 25, getattr(arcade.color, self.outlines[name]))
-            arcade.draw_circle_filled(x, y, 20, color)
+            base_pulse = sin(self.progress) * 5
+            arcade.draw_circle_filled(x, y, 34 + base_pulse, (r, g, b, 16))
+            arcade.draw_circle_filled(x, y, 29 + base_pulse, (r, g, b, 48))
+            arcade.draw_circle_filled(x, y, 22 + base_pulse, (r, g, b, 110))
+            arcade.draw_circle_filled(x, y, 18, color)
+            
             name='\n'.join(name.split('_'))
             for i, line in enumerate(name.split('\n')):
                 arcade.draw_text(line, x, y + 65 - i * 15,
                                 arcade.color.WHITE, 12, anchor_x="center")
-        for _, zone in self.states[self.turns]:
-            x, y = self.center_coordinates(self.parser.zones[zone].coordinates)
-            arcade.draw_circle_filled(x, y, 10, arcade.color.RED)
-
-        

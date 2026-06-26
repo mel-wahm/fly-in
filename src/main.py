@@ -13,7 +13,7 @@ red_color = '\033[91m' ; green_color = '\033[92m' ; end_color = '\033[0m'; bold_
 yellow_color = '\033[93m' ; light_blue_color = '\033[94m' ; blue_color = '\033[34m'
 
 try:
-    parser = MapParser(maps[1])
+    parser = MapParser(maps[9])
     parser.parse_map()
 
 
@@ -21,8 +21,8 @@ try:
     # for num, path in enumerate(paths):
         # for cost, path1 in path:
         # print(num + 1, ' -->', path)
-    # instance = Renderer(parser, parser.connections, paths)
-    # arcade.run()
+    instance = Renderer(parser, paths)
+    arcade.run()
     paths = paths[min(paths)]
     s_path = []
     for path in paths:
@@ -30,7 +30,7 @@ try:
         for key, value in zip(path, path[1:]):
             current_path[key] = value
         s_path.append(current_path)
-    states = Simulator(parser, s_path).simulating()
+    # states = Simulator(parser, s_path).simulating()
     # print(states)
     # Renderer(parser, states)
     # arcade.run()
