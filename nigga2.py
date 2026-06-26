@@ -10,12 +10,14 @@ class Render(arcade.Window):
                                 arcade.color.YALE_BLUE)
 if __name__ == "__main__":
     colors = [c for c in dir(arcade.color) if c.isupper()]
-    for color in colors:
-        c = getattr(arcade.color, color)
-        r, g, b, a = c
-        # print(a)
-        rr, gg, bb = (40, 150, 120)
-        if a < 255:
-            print(color)
+    r, g, b, a = getattr(arcade.color, "NAVAJO_WHITE")
+    print(r, g, b)
+    # for color in colors:
+    #     c = getattr(arcade.color, color)
+    #     r, g, b, a = c
+    #     # print(a)
+    #     rr, gg, bb = (40, 150, 120)
+    #     if a < 255:
+    #         print(color)
     # Render()
     # arcade.run()

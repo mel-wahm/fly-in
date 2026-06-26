@@ -35,7 +35,6 @@ class Renderer(arcade.Window):
         self.drag_y = 0
 
         # textures
-        self.drone_png = arcade.load_texture('photos/drone2.png')
         self.index = 1
 
         # find start/end hub positions

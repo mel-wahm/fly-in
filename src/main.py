@@ -16,13 +16,11 @@ try:
     parser = MapParser(maps[9])
     parser.parse_map()
 
-
-    paths = Pathfinder(Graph(parser.zones, parser.connections), parser).pathfinding()
+    graph = Graph(parser.zones, parser.connections)
+    paths = Pathfinder(graph, parser).pathfinding()
     # for num, path in enumerate(paths):
         # for cost, path1 in path:
         # print(num + 1, ' -->', path)
-    instance = Renderer(parser, paths)
-    arcade.run()
     paths = paths[min(paths)]
     s_path = []
     for path in paths:
@@ -30,7 +28,11 @@ try:
         for key, value in zip(path, path[1:]):
             current_path[key] = value
         s_path.append(current_path)
-    # states = Simulator(parser, s_path).simulating()
+    states = Simulator(parser, s_path, graph).simulating()
+    for turn, state in states.items():
+        print(turn, ' --> ', state)
+    instance = Renderer(parser, paths)
+    arcade.run()
     # print(states)
     # Renderer(parser, states)
     # arcade.run()
