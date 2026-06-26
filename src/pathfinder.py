@@ -15,8 +15,8 @@ class Pathfinder():
         self.end_zone = None
         self.final_path = []
         self.way_cost = {
-            Zone_Type.priority: 1,
-            Zone_Type.normal: 2,
+            Zone_Type.priority: 0.9,
+            Zone_Type.normal: 1,
             Zone_Type.restricted: 3,
             Zone_Type.blocked: -1
         }
@@ -31,8 +31,8 @@ class Pathfinder():
     def pathfinding(self):
         queue : list[tuple]= [(0, [self.start_zone])]
         paths : Dict[int, list] = {}
-
-        while queue and len(paths) < 4:
+        total_paths_found = 0
+        while queue and total_paths_found < 4:
             current_cost, current_path = heapq.heappop(queue)
             current_zone = current_path[-1]
             if current_zone == self.end_zone:
@@ -40,28 +40,19 @@ class Pathfinder():
                     paths[current_cost].append(current_path)
                 else:
                     paths[current_cost] = [current_path]
+                total_paths_found += 1
                 continue
             for next_zone, next_mlc in self.graph.graph[current_zone]:
+                max_drones = self.zones[next_zone].max_drones
                 if next_zone in current_path:
                     continue
                 next_type = self.way_cost[self.zones[next_zone].zone]
                 if next_type == -1:
                     continue
-                next_cost = next_type + (1 / next_mlc)
+                next_cost = next_type + (1 / min(next_mlc, max_drones))
+                # print((current_cost + next_cost, current_path + [next_zone]))
                 heapq.heappush(queue, (current_cost + next_cost, current_path + [next_zone]))
-        
+            # print('\n\n')
         if not paths:
             raise ValueError("The End Goal Is Not Reachable.")
-        return paths[min(paths)]
-
-
-    # def construct_path(self, came_from):
-    #     if self.end_zone not in came_from:
-    #         raise ValueError("The End Goal Is Not Reachable.")
-    #     self.final_path.append(self.end_zone)
-    #     current_zone = self.end_zone
-    #     while current_zone in came_from:
-    #         current_zone = came_from[current_zone]
-    #         self.final_path.append(current_zone)
-        
-    #     return self.final_path[::-1]
+        return paths

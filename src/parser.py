@@ -1,6 +1,9 @@
 from typing import List
 from models import Zone, Connection
 from pydantic import ValidationError
+red_color = '\033[91m'
+bold_font = '\033[1m'
+end_color = '\033[0m'
 
 class NegativeError(Exception):
     pass
@@ -41,7 +44,7 @@ class MapParser():
                 - The line indicating number of drones should be on top of the file.
                 - There should be only one line for the number of drones
             '''
-            
+
             if all(not line.startswith(prefix) for prefix in ['start_hub'
                                                               ,'end_hub'
                                                               ,'hub'
@@ -125,10 +128,15 @@ class MapParser():
 
                 elif line.startswith('end_hub'):
                     if not self.end_hub:
-                        
                         zone_coordinates = (hub_line[1], hub_line[2])
                         self.end_hub = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                             **metadata, role='end_hub')
+                        if 'max_drones' in metadata:
+                            if int(metadata['max_drones']) < self.nb_drones:
+                                print(f"{red_color}{bold_font}Warning: Not enough drones for the end hub. Defaulting to {self.nb_drones}{end_color}")
+                                self.end_hub.max_drones = self.nb_drones
+                        else:
+                            self.end_hub.max_drones = self.nb_drones
                         self.zones[hub_line[0]] = self.end_hub
                     else:
                         raise ValueError(f"Error in line {index}: You can only set the goal zone once.")
