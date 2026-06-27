@@ -12,8 +12,10 @@ maps = [
 red_color = '\033[91m' ; green_color = '\033[92m' ; end_color = '\033[0m'; bold_font = '\033[1m'
 yellow_color = '\033[93m' ; light_blue_color = '\033[94m' ; blue_color = '\033[34m'
 
+# for map in maps:
+#     print(map.split('/')[-1].split('.')[0], end=' ')
 try:
-    parser = MapParser(maps[9])
+    parser = MapParser(maps[1])
     parser.parse_map()
 
     graph = Graph(parser.zones, parser.connections)
@@ -29,11 +31,13 @@ try:
             current_path[key] = value
         s_path.append(current_path)
     states = Simulator(parser, s_path, graph).simulating()
+    # print(max(states))
+    instance = Renderer(parser, states)
+    arcade.run()
     for turn, state in states.items():
         print(turn, ' --> ', state)
-    instance = Renderer(parser, paths)
-    arcade.run()
-    # print(states)
+        print()
+    # print(states[max(states)])
     # Renderer(parser, states)
     # arcade.run()
 except KeyboardInterrupt:

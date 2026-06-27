@@ -1,10 +1,8 @@
 import arcade
 
-from models import Zone_Role
+from models import Zone_Role, Zone_Type
 from pathfinder import Pathfinder
 from math import sin
-
-
 
 class Renderer(arcade.Window):
     def center_coordinates(self, coords: tuple[int, int]):
@@ -15,12 +13,13 @@ class Renderer(arcade.Window):
 
 
     def __init__(self, parser, states):
-        super().__init__(1980, 1080, parser.map_path, fullscreen=True)
+        super().__init__(1980, 1080, parser.map_path, fullscreen=False)
         self.parser = parser
         self.connections = parser.connections
         self.speed = 150
         self.states = states
         self.progress = 0
+
         # for turn, state in self.states.items():
         #     print(turn, ' --> ', state)
         # average map coordinates, used to center everything on screen
@@ -35,7 +34,6 @@ class Renderer(arcade.Window):
         self.drag_y = 0
 
         # textures
-        self.index = 1
 
         # find start/end hub positions
         for zone_name, zone in self.parser.zones.items():
@@ -49,7 +47,6 @@ class Renderer(arcade.Window):
 
         #indexs
         self.turns = 0
-        self.times = 0
         
     # def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
     #     if scroll_y > 0:
@@ -63,18 +60,10 @@ class Renderer(arcade.Window):
         self.drag_y += dy
 
     def on_update(self, delta_time):
-        self.times += delta_time
         self.progress += delta_time * 3
-        if self.times > 1 and self.turns < len(self.states) - 1:
-            self.turns += 1
-            self.times = 0
-        else:
-            return
-
-        
-
 
     def on_draw(self):
+        second = int(self.time)
         # self.wallpaper = arcade.load_texture('photos/video_frames/frame_'+ f"{self.index % 565 + 1:05d}" +'.jpg')
         # if self.index > 565:
         #     self.index = 1
@@ -102,9 +91,22 @@ class Renderer(arcade.Window):
 
         # --- draw connections ---
         for con in self.connections:
+            color = arcade.color.LIGHT_BLUE
+            first_zone = self.parser.zones[con.connection[0]]
+            if first_zone.color:
+                if first_zone.color.upper() == 'BLACK':
+                    color = arcade.color.WHITE
+                else:
+                    try:
+                        color_name = first_zone.color.upper().replace("DARK", "DARK_") \
+                            .replace("LIGHT", "LIGHT_").replace("__", "_")
+                        color = getattr(arcade.color, color_name)
+                    except Exception:
+                        pass
+
             x_cord1, y_cord1 = self.center_coordinates(self.parser.zones[con.connection[0]].coordinates)
             x_cord2, y_cord2 = self.center_coordinates(self.parser.zones[con.connection[1]].coordinates)
-            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, arcade.color.EARTH_YELLOW, 4)
+            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, color, 4)
 
         arcade.rect.XYWH(self.drone_x, self.drone_y, 15, 15)
         self.turns += 1
@@ -127,14 +129,43 @@ class Renderer(arcade.Window):
             x, y = self.center_coordinates(zone.coordinates)
             
             r, g, b = color[:3]
+            luminance = 0.299 * r + 0.587 * g + 0.114 * b
 
             base_pulse = sin(self.progress) * 5
-            arcade.draw_circle_filled(x, y, 34 + base_pulse, (r, g, b, 16))
-            arcade.draw_circle_filled(x, y, 29 + base_pulse, (r, g, b, 48))
-            arcade.draw_circle_filled(x, y, 22 + base_pulse, (r, g, b, 110))
-            arcade.draw_circle_filled(x, y, 18, color)
-            
+            arcade.draw_circle_filled(x, y, 48 + base_pulse, (r, g, b, 30))
+            arcade.draw_circle_filled(x, y, 42 + base_pulse, (r, g, b, 60))
+            arcade.draw_circle_filled(x, y, 38 + base_pulse, (r, g, b, 90))
+            arcade.draw_circle_filled(x, y, 32, color)
+
             name='\n'.join(name.split('_'))
             for i, line in enumerate(name.split('\n')):
                 arcade.draw_text(line, x, y + 65 - i * 15,
-                                arcade.color.WHITE, 12, anchor_x="center")
+                                arcade.color.WHITE, 12, anchor_x="center")  
+
+        if second in self.states:
+            for drone, current_zone in self.states[second].items():
+                if second < len(self.states) - 2:
+                    print(second + 1)
+                    print(self.states[second + 1])
+                    next_zone = self.parser.zones[self.states[second + 1][drone]]
+                    if next_zone.zone == Zone_Type.restricted:
+                        if not drone.first_half:
+                            drone.first_half = True
+                            # cx, cy = self.center_coordinates(self.parser.zones[next_zone.name].coordinates) 
+                        else:
+                            drone.first_half = False
+                x, y = self.center_coordinates(self.parser.zones[current_zone].coordinates)
+                # if drone.first_half:
+                #     x, y = ((x + cx) // 2, (y + cy) // 2)
+                arcade.draw_circle_filled(x, y, 25 + base_pulse, (0, 0, 0, 120))
+                arcade.draw_circle_filled(x, y, 20 + base_pulse, (0, 0, 0, 190))
+                arcade.draw_circle_filled(x, y, 15, arcade.color.BLACK)
+                arcade.draw_text(drone.id, x, y, arcade.color.WHITE,
+                                 15, anchor_x='center', anchor_y='center')
+            # exit()
+        else:
+            arcade.draw_circle_filled(x, y, 25 + base_pulse, (0, 0, 0, 120))
+            arcade.draw_circle_filled(x, y, 20 + base_pulse, (0, 0, 0, 190))
+            arcade.draw_circle_filled(x, y, 15, arcade.color.BLACK)
+            arcade.draw_text(f'D{len(self.states[0])}', x, y, arcade.color.WHITE,
+                                15, anchor_x='center', anchor_y='center')

@@ -23,7 +23,6 @@ class Pathfinder():
         for zone_name, zone in self.zones.items():
             if zone.role == Zone_Role.start_hub:
                 self.start_zone = zone_name
-                self.costs[zone_name] = 0
             if zone.role == Zone_Role.end_hub:
                 self.end_zone = zone_name
 

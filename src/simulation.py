@@ -5,9 +5,16 @@ class Drone():
     def __init__(self, id, current_zone):
         self.id = id
         self.current_zone = current_zone
+        self.previous_zone = None
         self.waiting = False
         self.arrived = False
+        self.first_half = False
+    
+    def __str__(self):
+        return self.id
 
+    def __repr__(self):
+        return self.id
 class Simulator():
     def __init__(self, parser: MapParser, path, graph):
         self.graph = graph
@@ -16,44 +23,62 @@ class Simulator():
         self.states = {}
         self.parser = parser
         self.path = path
-        self.capacities = {connection.connection[1]: connection.max_link_capacity 
-                           for connection in parser.connections}
         self.connections = {}
         for connection in self.graph.connections:
             self.connections[connection.connection] = connection.max_link_capacity
-        # print(self.capacities)        
+        
 
     def simulating(self):
+        self.states[self.turns] = {d:d.current_zone for d in self.drones}
         while any(not drone.arrived for drone in self.drones):
-            self.states[self.turns] = [(d.id, d.current_zone) for d in self.drones]
             for id, drone in enumerate(self.drones):
                 #skipping arrived or waiting drones
                 if drone.arrived:
                     continue
-                if drone.current_zone == self.parser.end_hub.name:
-                    drone.arrived = True
-                    continue
+
                 if drone.waiting:
                     drone.waiting = False
                     continue
 
                 #initializing next_zone and connections between it and the next zone 
                 next_zone = self.path[id % len(self.path)][drone.current_zone]
-                direct_connection = self.connections.get((drone.current_zone, next_zone))
-                connection = (drone.current_zone, next_zone) \
+                direct_connection = (drone.current_zone, next_zone) in self.connections
+                next_connection = (drone.current_zone, next_zone)\
                     if direct_connection else (next_zone, drone.current_zone)
-                print(connection)
 
-                if self.parser.zones[next_zone].max_drones > 0:
+                previous_connection = None
+                if drone.current_zone != self.parser.start_hub.name:
+                    direct_connection2 = (drone.previous_zone, drone.current_zone) in self.connections
+                    previous_connection = (drone.previous_zone, drone.current_zone)\
+                        if direct_connection2 else (drone.current_zone, drone.previous_zone)
+
+                # print(drone.id, drone.current_zone, next_connection, self.connections[next_connection])
+                # print(drone.id, next_connection, self.connections[next_connection])
+                if self.parser.zones[next_zone].max_drones > 0 \
+                    and self.connections[next_connection] > 0:
+                    
                     if self.parser.zones[next_zone].zone == Zone_Type.restricted:
                         drone.waiting = True
-                    self.parser.zones[drone.current_zone].max_drones += 1
-                    self.connections[connection] += 1
-                    drone.current_zone = next_zone
-                    self.connections[connection] -= 1
-                    self.parser.zones[next_zone].max_drones -= 1
-            self.turns += 1
-        return self.states
 
+                    #freeing space for coming drones               
+                    if previous_connection:
+                        self.connections[previous_connection] += 1
+                    self.parser.zones[drone.current_zone].max_drones += 1
+
+                    #updating zones
+                    drone.previous_zone = drone.current_zone
+                    drone.current_zone = next_zone
+
+                    #reserving space for drone in the next zone                    
+                    # if self.parser.end_hub.name not in next_connection:
+                    self.connections[next_connection] -= 1
+                    self.parser.zones[next_zone].max_drones -= 1
+                    if drone.current_zone == self.parser.end_hub.name:
+                        drone.arrived = True
+                        self.connections[next_connection] += 1
+                # sleep(0.011)
+            self.turns += 1
+            self.states[self.turns] = {d : d.current_zone for d in self.drones}
             
+        return self.states
 
