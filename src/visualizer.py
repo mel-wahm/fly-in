@@ -80,7 +80,6 @@ class Renderer(arcade.Window):
 
         for g in range(0, self.height, 4):
                 arcade.draw_line(0, g, self.width, g, (222, 222, 222, 70))
-        
         for g in range(0, self.height, 80):
                 arcade.draw_line(0, g, self.width, g, (240, 198, 162, 80))
         for g in range(0, self.width, 80):
@@ -145,8 +144,6 @@ class Renderer(arcade.Window):
         if second in self.states:
             for drone, current_zone in self.states[second].items():
                 if second < len(self.states) - 2:
-                    print(second + 1)
-                    print(self.states[second + 1])
                     next_zone = self.parser.zones[self.states[second + 1][drone]]
                     if next_zone.zone == Zone_Type.restricted:
                         if not drone.first_half:

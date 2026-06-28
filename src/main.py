@@ -15,28 +15,34 @@ yellow_color = '\033[93m' ; light_blue_color = '\033[94m' ; blue_color = '\033[3
 # for map in maps:
 #     print(map.split('/')[-1].split('.')[0], end=' ')
 try:
-    parser = MapParser(maps[1])
+    parser = MapParser(maps[7])
     parser.parse_map()
-
     graph = Graph(parser.zones, parser.connections)
     paths = Pathfinder(graph, parser).pathfinding()
     # for num, path in enumerate(paths):
         # for cost, path1 in path:
         # print(num + 1, ' -->', path)
-    paths = paths[min(paths)]
+    # print(paths)
+    simu_paths = []
+    for cost, path in paths.items():
+        if cost < min(paths) + 1.5:
+            for p in paths[cost]:
+                simu_paths += [p]
+
     s_path = []
-    for path in paths:
+    for path in simu_paths:
         current_path = {}
         for key, value in zip(path, path[1:]):
             current_path[key] = value
         s_path.append(current_path)
+    
     states = Simulator(parser, s_path, graph).simulating()
     # print(max(states))
-    instance = Renderer(parser, states)
-    arcade.run()
     for turn, state in states.items():
         print(turn, ' --> ', state)
         print()
+    instance = Renderer(parser, states)
+    arcade.run()
     # print(states[max(states)])
     # Renderer(parser, states)
     # arcade.run()
