@@ -4,7 +4,6 @@ from models import Zone_Role
 from models import Zone_Type
 import heapq
 from typing import Dict
-from time import sleep
 
 class Pathfinder():
     def __init__(self, graph: Graph, parser: MapParser):
@@ -49,9 +48,7 @@ class Pathfinder():
                 if next_type == -1:
                     continue
                 next_cost = next_type + (1 / min(next_mlc, max_drones))
-                # print((current_cost + next_cost, current_path + [next_zone]))
                 heapq.heappush(queue, (current_cost + next_cost, current_path + [next_zone]))
-            # print('\n\n')
         if not paths:
             raise ValueError("The End Goal Is Not Reachable.")
         return paths

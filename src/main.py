@@ -1,4 +1,4 @@
-from parser import MapParser ; from visualizer import Renderer ;import warnings
+from parser import MapParser, NegativeError ; from visualizer import Renderer ;import warnings
 from pathfinder import Pathfinder ; from graph import Graph ; from simulation import Drone, Simulator
 from pydantic import ValidationError; import arcade
 from time import sleep
@@ -15,8 +15,11 @@ yellow_color = '\033[93m' ; light_blue_color = '\033[94m' ; blue_color = '\033[3
 # for map in maps:
 #     print(map.split('/')[-1].split('.')[0], end=' ')
 try:
-    parser = MapParser(maps[7])
+    parser = MapParser(maps[0])
     parser.parse_map()
+    print(parser.zones['waypoint1'].max_drones)
+    # exit()
+    # print(bold_font, green_color, "Parsing is perfect", end_color, sep='')
     graph = Graph(parser.zones, parser.connections)
     paths = Pathfinder(graph, parser).pathfinding()
     # for num, path in enumerate(paths):
@@ -41,10 +44,18 @@ try:
     for turn, state in states.items():
         print(turn, ' --> ', state)
         print()
+    print(max(states))  
     instance = Renderer(parser, states)
     arcade.run()
-    # print(states[max(states)])
     # Renderer(parser, states)
     # arcade.run()
+
 except KeyboardInterrupt:
     print()
+except ValidationError as e:
+    for error in e.errors():
+        print(bold_font, red_color, error['msg'], end_color, sep='')
+except NegativeError as e:
+    print(bold_font, red_color, e, end_color, sep='')
+except ValueError as e:
+    print(bold_font, red_color, e, end_color, sep='')

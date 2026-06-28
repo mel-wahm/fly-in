@@ -128,12 +128,11 @@ class Renderer(arcade.Window):
             x, y = self.center_coordinates(zone.coordinates)
             
             r, g, b = color[:3]
-            luminance = 0.299 * r + 0.587 * g + 0.114 * b
+            increment = sin(self.progress) * 5
 
-            base_pulse = sin(self.progress) * 5
-            arcade.draw_circle_filled(x, y, 48 + base_pulse, (r, g, b, 30))
-            arcade.draw_circle_filled(x, y, 42 + base_pulse, (r, g, b, 60))
-            arcade.draw_circle_filled(x, y, 38 + base_pulse, (r, g, b, 90))
+            arcade.draw_circle_filled(x, y, 48 + increment, (r, g, b, 30))
+            arcade.draw_circle_filled(x, y, 42 + increment, (r, g, b, 60))
+            arcade.draw_circle_filled(x, y, 38 + increment, (r, g, b, 90))
             arcade.draw_circle_filled(x, y, 32, color)
 
             name='\n'.join(name.split('_'))
@@ -154,15 +153,15 @@ class Renderer(arcade.Window):
                 x, y = self.center_coordinates(self.parser.zones[current_zone].coordinates)
                 # if drone.first_half:
                 #     x, y = ((x + cx) // 2, (y + cy) // 2)
-                arcade.draw_circle_filled(x, y, 25 + base_pulse, (0, 0, 0, 120))
-                arcade.draw_circle_filled(x, y, 20 + base_pulse, (0, 0, 0, 190))
+                arcade.draw_circle_filled(x, y, 25 + increment, (0, 0, 0, 120))
+                arcade.draw_circle_filled(x, y, 20 + increment, (0, 0, 0, 190))
                 arcade.draw_circle_filled(x, y, 15, arcade.color.BLACK)
                 arcade.draw_text(drone.id, x, y, arcade.color.WHITE,
                                  15, anchor_x='center', anchor_y='center')
             # exit()
         else:
-            arcade.draw_circle_filled(x, y, 25 + base_pulse, (0, 0, 0, 120))
-            arcade.draw_circle_filled(x, y, 20 + base_pulse, (0, 0, 0, 190))
+            arcade.draw_circle_filled(x, y, 25 + increment, (0, 0, 0, 120))
+            arcade.draw_circle_filled(x, y, 20 + increment, (0, 0, 0, 190))
             arcade.draw_circle_filled(x, y, 15, arcade.color.BLACK)
             arcade.draw_text(f'D{len(self.states[0])}', x, y, arcade.color.WHITE,
                                 15, anchor_x='center', anchor_y='center')
