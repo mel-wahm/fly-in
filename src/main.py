@@ -9,29 +9,34 @@ maps = [
     'maps/hard/01_maze_nightmare.txt',  'maps/hard/02_capacity_hell.txt', 'maps/hard/03_ultimate_challenge.txt', 
     'maps/challenger/01_the_impossible_dream.txt' #9
     ]
+scores = {
+    maps[0]: 6,
+    maps[1]: 8,
+    maps[2]: 6,
+    maps[3]: 12,
+    maps[4]: 15,
+    maps[5]: 12,
+    maps[6]: 30,
+    maps[7]: 35,
+    maps[8]: 45,
+    maps[9]: 45,
+}
 red_color = '\033[91m' ; green_color = '\033[92m' ; end_color = '\033[0m'; bold_font = '\033[1m'
 yellow_color = '\033[93m' ; light_blue_color = '\033[94m' ; blue_color = '\033[34m'
 
-# for map in maps:
-#     print(map.split('/')[-1].split('.')[0], end=' ')
+
 try:
     parser = MapParser(maps[0])
     parser.parse_map()
-    print(parser.zones['waypoint1'].max_drones)
-    # exit()
-    # print(bold_font, green_color, "Parsing is perfect", end_color, sep='')
     graph = Graph(parser.zones, parser.connections)
     paths = Pathfinder(graph, parser).pathfinding()
-    # for num, path in enumerate(paths):
-        # for cost, path1 in path:
-        # print(num + 1, ' -->', path)
     # print(paths)
     simu_paths = []
     for cost, path in paths.items():
-        if cost < min(paths) + 1.5:
+        if cost < min(paths) + 0.7:
             for p in paths[cost]:
                 simu_paths += [p]
-
+    # simu_paths = paths[min(paths)]
     s_path = []
     for path in simu_paths:
         current_path = {}
@@ -40,15 +45,9 @@ try:
         s_path.append(current_path)
     
     states = Simulator(parser, s_path, graph).simulating()
-    # print(max(states))
-    for turn, state in states.items():
-        print(turn, ' --> ', state)
-        print()
-    print(max(states))  
+    
     instance = Renderer(parser, states)
     arcade.run()
-    # Renderer(parser, states)
-    # arcade.run()
 
 except KeyboardInterrupt:
     print()

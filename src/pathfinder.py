@@ -47,7 +47,7 @@ class Pathfinder():
                 next_type = self.way_cost[self.zones[next_zone].zone]
                 if next_type == -1:
                     continue
-                next_cost = next_type + (1 / min(next_mlc, max_drones))
+                next_cost = next_type - (1 - 1 / min(next_mlc, max_drones))
                 heapq.heappush(queue, (current_cost + next_cost, current_path + [next_zone]))
         if not paths:
             raise ValueError("The End Goal Is Not Reachable.")

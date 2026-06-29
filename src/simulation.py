@@ -75,7 +75,5 @@ class Simulator():
                 self.connections[connection] += count
             self.turns += 1
             self.states[self.turns] = {d : d.current_zone for d in self.drones}
-        for turn, state in self.states.items():
-            print(turn, ' --> ', state)
-            print()
+
         return self.states

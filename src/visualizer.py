@@ -48,13 +48,6 @@ class Renderer(arcade.Window):
         #indexs
         self.turns = 0
         
-    # def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
-    #     if scroll_y > 0:
-    #         self.zoom *= 1.1
-    #     elif scroll_y < 0:
-    #         self.zoom /= 1.1
-    #     self.zoom = max(0.1, min(self.zoom, 10))
-
     def on_mouse_drag(self, x, y, dx, dy, _buttons, _modifiers):
         self.drag_x += dx
         self.drag_y += dy
@@ -64,11 +57,6 @@ class Renderer(arcade.Window):
 
     def on_draw(self):
         second = int(self.time)
-        # self.wallpaper = arcade.load_texture('photos/video_frames/frame_'+ f"{self.index % 565 + 1:05d}" +'.jpg')
-        # if self.index > 565:
-        #     self.index = 1
-        
-        # self.index += 1
         self.clear()
 
         # background
@@ -84,9 +72,6 @@ class Renderer(arcade.Window):
                 arcade.draw_line(0, g, self.width, g, (240, 198, 162, 80))
         for g in range(0, self.width, 80):
                 arcade.draw_line(g, 0, g, self.height, (240, 198, 162, 80))
-# 
-        # arcade.draw_rect_outline(arcade.rect.XYWH(self.width / 2, self.height / 2,
-                                    # 1500, 830), arcade.color.YELLOW, 1, 0)
 
         # --- draw connections ---
         for con in self.connections:
@@ -105,7 +90,11 @@ class Renderer(arcade.Window):
 
             x_cord1, y_cord1 = self.center_coordinates(self.parser.zones[con.connection[0]].coordinates)
             x_cord2, y_cord2 = self.center_coordinates(self.parser.zones[con.connection[1]].coordinates)
-            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, color, 4)
+            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, arcade.color.WHITE, 3)
+            r, g, b = color[:3]
+            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, (r, g, b, 90), 9)
+            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, (r, g, b, 60), 11)
+            arcade.draw_line(x_cord1, y_cord1, x_cord2, y_cord2, (r, g, b, 30), 13)
 
         arcade.rect.XYWH(self.drone_x, self.drone_y, 15, 15)
         self.turns += 1
@@ -147,12 +136,9 @@ class Renderer(arcade.Window):
                     if next_zone.zone == Zone_Type.restricted:
                         if not drone.first_half:
                             drone.first_half = True
-                            # cx, cy = self.center_coordinates(self.parser.zones[next_zone.name].coordinates) 
                         else:
                             drone.first_half = False
                 x, y = self.center_coordinates(self.parser.zones[current_zone].coordinates)
-                # if drone.first_half:
-                #     x, y = ((x + cx) // 2, (y + cy) // 2)
                 arcade.draw_circle_filled(x, y, 25 + increment, (0, 0, 0, 120))
                 arcade.draw_circle_filled(x, y, 20 + increment, (0, 0, 0, 190))
                 arcade.draw_circle_filled(x, y, 15, arcade.color.BLACK)
@@ -160,6 +146,7 @@ class Renderer(arcade.Window):
                                  15, anchor_x='center', anchor_y='center')
             # exit()
         else:
+            x, y = self.center_coordinates(self.parser.end_hub.coordinates)
             arcade.draw_circle_filled(x, y, 25 + increment, (0, 0, 0, 120))
             arcade.draw_circle_filled(x, y, 20 + increment, (0, 0, 0, 190))
             arcade.draw_circle_filled(x, y, 15, arcade.color.BLACK)

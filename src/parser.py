@@ -120,7 +120,6 @@ class MapParser():
                 if hub_line[0] in self.zones:
                         raise ValueError(f"Error in line {index + 1}: multiple zones with the name \"{hub_line[0]}\".")
 
-
                 if line.startswith('start_hub'):
                     if not self.start_hub:
                         zone_coordinates = (hub_line[1], hub_line[2])
@@ -148,7 +147,6 @@ class MapParser():
                 elif line.startswith('hub'):
                     
                     zone_coordinates = (hub_line[1], hub_line[2])
-                    print(metadata)
                     zone = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                 **metadata, role='hub')
                     self.zones[hub_line[0]] = zone
