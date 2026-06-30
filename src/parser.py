@@ -1,6 +1,7 @@
 from typing import List
 from models import Zone, Connection
 from pydantic import ValidationError
+# UNNECESSARY: These color variables are not used in this file (only used in main.py)
 red_color = '\033[91m'
 bold_font = '\033[1m'
 end_color = '\033[0m'
@@ -38,7 +39,6 @@ class MapParser():
             raise ValueError('The map file is empty.')
         valid_lines = 0
         for index, line in enumerate(self.map):
-            
             '''
             Handling the nb_drones case:
             Requirements:
@@ -97,7 +97,7 @@ class MapParser():
                                         or hub_line[-1][-1].strip() != ']'):
                     raise ValueError(f'Error in line {index + 1}: "{" ".join(hub_line)}": {self.invalid_format} ')
                 metadata = {}
-                if len (hub_line) == 4:
+                if len(hub_line) == 4:
                     token = hub_line[3].strip('[]').replace('=', ' = ').split()
                     if not token:
                         raise ValueError(f"Error in line {index + 1}: Unsupported metadata format {token}."
@@ -120,9 +120,17 @@ class MapParser():
                 if hub_line[0] in self.zones:
                         raise ValueError(f"Error in line {index + 1}: multiple zones with the name \"{hub_line[0]}\".")
 
+                zone_coordinates = (hub_line[1], hub_line[2])
+                try:
+                    x, y = list(map(int, zone_coordinates))
+                except ValueError:
+                    raise(f"Error in line {index + 1}: The coordinates of the zone can be only integers")
+                if any((x, y) == self.zones[zone].coordinates for zone in self.zones):
+                    raise ValueError(f"Error in line {index + 1}: Two drones share the same coordinates")
+
+
                 if line.startswith('start_hub'):
                     if not self.start_hub:
-                        zone_coordinates = (hub_line[1], hub_line[2])
                         self.start_hub = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                               **metadata, role='start_hub')
                         self.zones[hub_line[0]] = self.start_hub
@@ -131,7 +139,6 @@ class MapParser():
 
                 elif line.startswith('end_hub'):
                     if not self.end_hub:
-                        zone_coordinates = (hub_line[1], hub_line[2])
                         self.end_hub = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                             **metadata, role='end_hub')
                         if 'max_drones' in metadata:
@@ -145,8 +152,6 @@ class MapParser():
                         raise ValueError(f"Error in line {index + 1}: You can only set the goal zone once.")
 
                 elif line.startswith('hub'):
-                    
-                    zone_coordinates = (hub_line[1], hub_line[2])
                     zone = Zone(name=hub_line[0], coordinates=zone_coordinates,
                                 **metadata, role='hub')
                     self.zones[hub_line[0]] = zone

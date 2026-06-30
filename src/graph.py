@@ -4,9 +4,10 @@ from typing import Dict, Tuple, List
 
 class Graph():
 
-    def __init__(self, zones, connections):
-        self.zones : Dict[str, Zone] = zones 
-        self.connections : List [Connection] = connections
+    def __init__(self, parser):
+        self.parser = parser
+        self.zones : Dict[str, Zone] = parser.zones
+        self.connections : List [Connection] = parser.connections
         self.graph :  Dict[str, List[Tuple[str, int]]] = {}
         self.adjacency_list()
 
@@ -21,3 +22,5 @@ class Graph():
                 self.graph[second_zone] = []
             self.graph[first_zone].append((second_zone, cap))
             self.graph[second_zone].append((first_zone, cap))
+        if not self.parser.start_hub.name in self.graph:
+            raise ValueError("The start zone is Isolated.")

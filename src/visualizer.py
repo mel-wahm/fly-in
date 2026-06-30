@@ -13,7 +13,7 @@ class Renderer(arcade.Window):
 
 
     def __init__(self, parser, states):
-        super().__init__(1980, 1080, parser.map_path, fullscreen=False)
+        super().__init__(1980, 1080, parser.map_path, fullscreen=True)
         self.parser = parser
         self.connections = parser.connections
         self.speed = 150

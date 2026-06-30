@@ -26,9 +26,9 @@ yellow_color = '\033[93m' ; light_blue_color = '\033[94m' ; blue_color = '\033[3
 
 
 try:
-    parser = MapParser(maps[0])
+    parser = MapParser(maps[9])
     parser.parse_map()
-    graph = Graph(parser.zones, parser.connections)
+    graph = Graph(parser)
     paths = Pathfinder(graph, parser).pathfinding()
     # print(paths)
     simu_paths = []
