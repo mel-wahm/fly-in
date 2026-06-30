@@ -1,7 +1,7 @@
 import arcade
 
-from models import Zone_Role, Zone_Type
-from pathfinder import Pathfinder
+from .models import Zone_Role, Zone_Type
+from .pathfinder import Pathfinder
 from math import sin
 
 class Renderer(arcade.Window):

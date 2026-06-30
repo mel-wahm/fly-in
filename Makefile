@@ -1,3 +1,4 @@
 PY= python
-run: src/main.py
-	@uv run $(PY) src/main.py
+run:
+	@echo "\033[92mRunning Fly-IN..."
+	@uv run $(PY) -m src

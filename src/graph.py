@@ -1,4 +1,4 @@
-from models import Zone, Connection
+from .models import Zone, Connection
 from typing import Dict, Tuple, List
 
 

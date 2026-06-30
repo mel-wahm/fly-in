@@ -1,7 +1,6 @@
-from parser import MapParser, NegativeError ; from visualizer import Renderer ;import warnings
-from pathfinder import Pathfinder ; from graph import Graph ; from simulation import Drone, Simulator
+from .parser import MapParser, NegativeError ; from .visualizer import Renderer ;import warnings
+from .pathfinder import Pathfinder ; from .graph import Graph ; from .simulation import Simulator
 from pydantic import ValidationError; import arcade
-from time import sleep
 warnings.filterwarnings("ignore")
 maps = [
     'maps/easy/01_linear_path.txt',  'maps/easy/02_simple_fork.txt', 'maps/easy/03_basic_capacity.txt',  

@@ -1,5 +1,5 @@
 from typing import List
-from models import Zone, Connection
+from .models import Zone, Connection
 from pydantic import ValidationError
 # UNNECESSARY: These color variables are not used in this file (only used in main.py)
 red_color = '\033[91m'

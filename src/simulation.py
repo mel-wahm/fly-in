@@ -1,6 +1,5 @@
-from parser import MapParser
-from time import sleep
-from models import Zone_Type
+from .parser import MapParser
+from .models import Zone_Type
 class Drone():
     def __init__(self, id, current_zone):
         self.id = id

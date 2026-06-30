@@ -1,7 +1,7 @@
-from graph import Graph
-from parser import MapParser
-from models import Zone_Role
-from models import Zone_Type
+from .graph import Graph
+from .parser import MapParser
+from .models import Zone_Role
+from .models import Zone_Type
 import heapq
 from typing import Dict
 
