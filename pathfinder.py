@@ -1,9 +1,10 @@
-from .graph import Graph
-from .parser import MapParser
-from .models import Zone_Role
-from .models import Zone_Type
+from graph import Graph
+from parser import MapParser
+from models import Zone_Role
+from models import Zone_Type
 import heapq
-from typing import Dict
+from typing import Dict, List
+
 
 class Pathfinder():
     def __init__(self, graph: Graph, parser: MapParser):
@@ -12,7 +13,7 @@ class Pathfinder():
         self.costs = {zone: float("inf") for zone in self.zones}
         self.start_zone = None
         self.end_zone = None
-        self.final_path = []
+        self.final_path: List[str] = []
         self.way_cost = {
             Zone_Type.priority: 0.9,
             Zone_Type.normal: 1,
@@ -25,10 +26,9 @@ class Pathfinder():
             if zone.role == Zone_Role.end_hub:
                 self.end_zone = zone_name
 
-
-    def pathfinding(self):
-        queue : list[tuple]= [(0, [self.start_zone])]
-        paths : Dict[int, list] = {}
+    def pathfinding(self) -> Dict[int, list]:
+        queue: list[tuple] = [(0, [self.start_zone])]
+        paths: Dict[int, list] = {}
         total_paths_found = 0
         while queue and total_paths_found < 4:
             current_cost, current_path = heapq.heappop(queue)
@@ -48,7 +48,9 @@ class Pathfinder():
                 if next_type == -1:
                     continue
                 next_cost = next_type - (1 - 1 / min(next_mlc, max_drones))
-                heapq.heappush(queue, (current_cost + next_cost, current_path + [next_zone]))
+                heapq.heappush(queue,
+                               (current_cost + next_cost,
+                                current_path + [next_zone]))
         if not paths:
             raise ValueError("The End Goal Is Not Reachable.")
         return paths
