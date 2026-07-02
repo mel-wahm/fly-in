@@ -17,9 +17,9 @@ light_blue_color = '\033[94m'
 blue_color = '\033[34m'
 
 try:
-    parser = MapParser(sys.argv[1])
+    parser = MapParser(sys.argv[1] if len(sys.argv) > 1
+                       else "maps/easy/01_linear_path.txt")
     parser.parse_map()
-    print(green_color, "Parsing successful", end_color, sep='')
     graph = Graph(parser)
     paths = Pathfinder(graph, parser).pathfinding()
     simu_paths = []

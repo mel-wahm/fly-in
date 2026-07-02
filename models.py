@@ -25,10 +25,16 @@ class Zone(BaseModel):
     role: Zone_Role = Zone_Role.hub
 
     @field_validator('name')
-    def val(cls, name: str) -> str:
+    def name_val(cls, name: str) -> str:
         if '-' in name or ' ' in name:
-            raise ValueError('Tha name of the zone cannot contain a dash "-"')
+            raise ValueError('The name of the zone cannot contain a dash "-"')
         return name
+
+    @field_validator('color')
+    def color_val(cls, color: str) -> str:
+        if not color.replace('_', '').isalpha():
+            raise ValueError('The color of the zone can only contain letters.')
+        return color
 
 
 class Connection(BaseModel):

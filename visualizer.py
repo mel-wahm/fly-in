@@ -25,6 +25,7 @@ class Renderer(arcade.Window):
         self.sec: float = 0
         self.wallpaper = arcade.rect.XYWH(self.width / 2,
                                           self.height / 2, 1980, 1080)
+        self.intro = True
         cors = [zone.coordinates for zone in self.parser.zones.values()]
         xs = [c[0] for c in cors]
         ys = [c[1] for c in cors]
@@ -39,7 +40,12 @@ class Renderer(arcade.Window):
                 self.start_pos = parser.zones[zone_name].coordinates
         self.drone_x, self.drone_y = self.center_coordinates(self.start_pos)
 
-        self.turns = 0
+        # turns
+        self.wall = arcade.rect.XYWH(self.width / 2, self.height / 2,
+                                     1980, 1080)
+        self.turn_wall = arcade.rect.XYWH(0 + 100, 0 + 60, 120, 70)
+        self.turn_outline = arcade.rect.XYWH(0 + 100, 0 + 60, 110, 63)
+        self.turn_outline2 = arcade.rect.XYWH(0 + 100, 0 + 60, 105, 58)
 
     def draw_drone(self, x: float, y: float, name: Any) -> None:
         arcade.draw_circle_filled(x, y, 18, (255, 0, 40, 50), num_segments=100)
@@ -73,7 +79,7 @@ class Renderer(arcade.Window):
     def on_update(self, delta_time: float) -> None:
         self.zone_progress += delta_time * 3
         self.wall_progress += delta_time * 120
-        if not self.pause:
+        if not self.pause and not self.intro:
             self.sec += delta_time
             if self.sec >= 1:
                 self.sec = 0
@@ -81,13 +87,23 @@ class Renderer(arcade.Window):
 
     def on_key_press(self, symbol: int, _modifiers: int) -> None:
         if symbol == arcade.key.SPACE:
-            if self.pause:
-                self.pause = False
-            else:
-                self.pause = True
+            self.pause = not self.pause
+        if symbol == arcade.key.R:
+            self.pause = False
+            self.second = 0
+        if symbol == arcade.key.ENTER:
+            self.intro = False
+        if symbol == arcade.key.LEFT:
+            self.pause = True
+            self.second = max(0, self.second - 1)
+        if symbol == arcade.key.RIGHT:
+            self.pause = True
+            self.second = min(max(self.states), self.second + 1)
         if symbol == arcade.key.Q:
             print('Closing Fly-In.')
             exit()
+        if symbol == arcade.key.F:
+            self.set_fullscreen(not self.fullscreen)
 
     def on_draw(self) -> None:
         # self.second = int(self.time)
@@ -113,93 +129,167 @@ class Renderer(arcade.Window):
         #     arcade.draw_line(cx, cy, nx, ny,
         #                      (60, 200, 120, max(0, 150 - i * 10)), 2)
 
-        for con in self.connections:
-            color = arcade.color.LIGHT_BLUE
-            first_zone = self.parser.zones[con.connection[0]]
-            if first_zone.color:
-                if first_zone.color.upper() == "BLACK":
-                    color = arcade.color.WHITE
-                else:
-                    try:
-                        color_name = (
-                            first_zone.color.upper()
-                            .replace("DARK", "DARK_")
-                            .replace("LIGHT", "LIGHT_")
-                            .replace("__", "_")
-                        )
-                        color = getattr(arcade.color, color_name)
-                    except Exception:
-                        pass
+        if self.intro:
+            cx = self.width / 2
+            cy = self.height / 2
 
-            x_cord1, y_cord1 = self.center_coordinates(
-                self.parser.zones[con.connection[0]].coordinates
+            arcade.draw_text(
+                "FLY-IN", cx + 4, cy + 146,
+                (0, 238, 255, 100), 80,
+                anchor_x="center", anchor_y="center", bold=True
             )
-            x_cord2, y_cord2 = self.center_coordinates(
-                self.parser.zones[con.connection[1]].coordinates
+            arcade.draw_text(
+                "FLY-IN", cx, cy + 150,
+                arcade.color.WHITE, 80,
+                anchor_x="center", anchor_y="center", bold=True
             )
-            arcade.draw_line(x_cord1, y_cord1,
-                             x_cord2, y_cord2, arcade.color.WHITE, 3)
-            r, g, b = color[:3]
-            arcade.draw_line(x_cord1, y_cord1,
-                             x_cord2, y_cord2, (r, g, b, 90), 9)
-            arcade.draw_line(x_cord1, y_cord1,
-                             x_cord2, y_cord2, (r, g, b, 60), 11)
-            arcade.draw_line(x_cord1, y_cord1,
-                             x_cord2, y_cord2, (r, g, b, 30), 13)
 
-        for name, zone in self.parser.zones.items():
-            color = arcade.color.LIGHT_BLUE
-            if zone.color:
-                if zone.color.upper() == "BLACK":
-                    color = arcade.color.WHITE
-                else:
-                    try:
-                        color_name = (
-                            zone.color.upper()
-                            .replace("DARK", "DARK_")
-                            .replace("LIGHT", "LIGHT_")
-                            .replace("__", "_")
-                        )
-                        color = getattr(arcade.color, color_name)
-                    except Exception:
-                        pass
+            arcade.draw_rect_filled(
+                arcade.rect.XYWH(cx, cy - 110, 400, 260),
+                (16, 28, 36, 230)
+            )
+            arcade.draw_rect_outline(
+                arcade.rect.XYWH(cx, cy - 110, 400, 260),
+                (3, 163, 217), 2
+            )
 
-            x, y = self.center_coordinates(zone.coordinates)
-            r, g, b = color[:3]
-            increment = sin(self.zone_progress) * 5
+            # Controls header
+            arcade.draw_text(
+                "CONTROLS", cx, cy - 10,
+                arcade.color.WHITE, 12,
+                anchor_x="center", anchor_y="center", bold=True
+            )
+            arcade.draw_line(cx - 150, cy - 25,
+                             cx + 150, cy - 25, (3, 163, 217), 1)
 
-            arcade.draw_circle_filled(x, y, 38 + increment, (r, g, b, 30))
-            arcade.draw_circle_filled(x, y, 32 + increment, (r, g, b, 60))
-            arcade.draw_circle_filled(x, y, 28 + increment, (r, g, b, 90))
-            arcade.draw_circle_filled(x, y, 22, color)
+            # Control mappings based on your on_key_press
+            controls = [
+                ("ENTER", "START"),
+                ("SPACE", "PAUSE / RESUME"),
+                ("LEFT / RIGHT", "STEP TIMELINE"),
+                ("R", "RESET"),
+                ("F", "FULLSCREEN"),
+                ("Q", "QUIT")
+            ]
 
-            name = "\n".join(name.split("_"))
-            for i, line in enumerate(name.split("\n")):
+            for i, (key, action) in enumerate(controls):
+                y_pos = cy - 55 - (i * 30)
                 arcade.draw_text(
-                    line, x, y + 65 - i * 15,
-                    arcade.color.WHITE, 12, anchor_x="center"
+                    key, cx - 15, y_pos,
+                    (0, 238, 255), 11,
+                    anchor_x="right", anchor_y="center", bold=True
                 )
-
-        if self.second in self.states:
-            for drone, current_zone in self.states[self.second].items():
-                x, y = self.center_coordinates(
-                    self.parser.zones[current_zone].coordinates
+                arcade.draw_text(
+                    action, cx + 15, y_pos,
+                    (200, 220, 230), 11,
+                    anchor_x="left", anchor_y="center"
                 )
-                prev_zone = self.parser.zones[
-                    self.states[max(0, self.second - 1)][drone]
-                ]
-                px, py = self.center_coordinates(prev_zone.coordinates)
-                next_idx = min(len(self.states) - 1, self.second + 1)
-                doubled = self.states[next_idx][drone] == current_zone
-                current_zone_obj = self.parser.zones[current_zone]
-                restricted = (
-                    current_zone_obj.zone == Zone_Type.restricted
-                )
-                if doubled and restricted:
-                    self.draw_drone((x + px) / 2, (y + py) / 2, drone.id)
-                else:
-                    self.draw_drone(x, y, drone.id)
 
         else:
-            x, y = self.center_coordinates(self.parser.end_hub.coordinates)
-            self.draw_drone(x, y, f"D{len(self.states[0])}")
+            for con in self.connections:
+                color = arcade.color.LIGHT_BLUE
+                first_zone = self.parser.zones[con.connection[0]]
+                if first_zone.color:
+                    if first_zone.color.upper() == "BLACK":
+                        color = arcade.color.WHITE
+                    else:
+                        try:
+                            color_name = (
+                                first_zone.color.upper()
+                                .replace("DARK", "DARK_")
+                                .replace("LIGHT", "LIGHT_")
+                                .replace("__", "_")
+                            )
+                            color = getattr(arcade.color, color_name)
+                        except Exception:
+                            pass
+
+                x_cord1, y_cord1 = self.center_coordinates(
+                    self.parser.zones[con.connection[0]].coordinates
+                )
+                x_cord2, y_cord2 = self.center_coordinates(
+                    self.parser.zones[con.connection[1]].coordinates
+                )
+                arcade.draw_line(x_cord1, y_cord1,
+                                 x_cord2, y_cord2, arcade.color.WHITE, 3)
+                r, g, b = color[:3]
+                arcade.draw_line(x_cord1, y_cord1,
+                                 x_cord2, y_cord2, (r, g, b, 90), 9)
+                arcade.draw_line(x_cord1, y_cord1,
+                                 x_cord2, y_cord2, (r, g, b, 60), 11)
+                arcade.draw_line(x_cord1, y_cord1,
+                                 x_cord2, y_cord2, (r, g, b, 30), 13)
+
+            for name, zone in self.parser.zones.items():
+                color = arcade.color.LIGHT_BLUE
+                if zone.color:
+                    if zone.color.upper() == "BLACK":
+                        color = arcade.color.WHITE
+                    else:
+                        try:
+                            color_name = (
+                                zone.color.upper()
+                                .replace("DARK", "DARK_")
+                                .replace("LIGHT", "LIGHT_")
+                                .replace("__", "_")
+                            )
+                            color = getattr(arcade.color, color_name)
+                        except Exception:
+                            pass
+
+                x, y = self.center_coordinates(zone.coordinates)
+                r, g, b = color[:3]
+                increment = sin(self.zone_progress) * 5
+
+                arcade.draw_circle_filled(x, y, 38 + increment, (r, g, b, 30))
+                arcade.draw_circle_filled(x, y, 32 + increment, (r, g, b, 60))
+                arcade.draw_circle_filled(x, y, 28 + increment, (r, g, b, 90))
+                arcade.draw_circle_filled(x, y, 22, color)
+
+                name = "\n".join(name.split("_"))
+                for i, line in enumerate(name.split("\n")):
+                    arcade.draw_text(
+                        line, x, y + 65 - i * 15,
+                        arcade.color.WHITE, 12, anchor_x="center"
+                    )
+
+            if self.second in self.states:
+                for drone, current_zone in self.states[self.second].items():
+                    x, y = self.center_coordinates(
+                        self.parser.zones[current_zone].coordinates
+                    )
+                    prev_zone = self.parser.zones[
+                        self.states[max(0, self.second - 1)][drone]
+                    ]
+                    px, py = self.center_coordinates(prev_zone.coordinates)
+                    next_idx = min(len(self.states) - 1, self.second + 1)
+                    doubled = self.states[next_idx][drone] == current_zone
+                    current_zone_obj = self.parser.zones[current_zone]
+                    restricted = (
+                        current_zone_obj.zone == Zone_Type.restricted
+                    )
+                    if doubled and restricted:
+                        self.draw_drone((x + px) / 2, (y + py) / 2, drone.id)
+                    else:
+                        self.draw_drone(x, y, drone.id)
+
+            else:
+                x, y = self.center_coordinates(self.parser.end_hub.coordinates)
+                self.draw_drone(x, y, f"D{len(self.states[0])}")
+
+            r, g, b = arcade.color.RIFLE_GREEN[:3]
+            arcade.draw_rect_filled(self.wall, (r, g, b, 50))
+            arcade.draw_rect_filled(self.turn_wall, (16, 28, 36))
+            arcade.draw_rect_outline(self.turn_outline, (3, 163, 217))
+            arcade.draw_rect_outline(self.turn_outline2, (0, 238, 255))
+
+            arcade.draw_text(
+                str(min(max(self.states), self.second)),
+                100,
+                62,
+                arcade.color.WHITE,
+                24,
+                anchor_x="center",
+                anchor_y="center",
+                bold=True
+            )

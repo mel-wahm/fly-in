@@ -1,13 +1,12 @@
 PY= python
 FILE = maps/easy/01_linear_path.txt
-install:
-	@pip install pydantic arcade
-
 
 run:
 	@echo "\033[92mRunning Fly-IN...\033[0m"
 	@uv run $(PY) fly-in.py $(FILE)
 
+install:
+	@pip install pydantic arcade --break-system-packages
 
 debug:
 	@echo "\033[92mDebug mode activated...\033[0m" 
